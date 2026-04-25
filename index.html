@@ -2,358 +2,708 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>World Cup Predictor (Score-Based)</title>
+<title>48-Team World Cup Engine (Authentic 2026 Bracket)</title>
 
 <style>
-body {
-  font-family: Arial;
-  padding: 20px;
+body { font-family: Arial; padding: 20px; }
+
+.header-controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.tabs { display:flex; gap:10px; }
+
+.tab {
+  padding:8px 12px;
+  border:1px solid #aaa;
+  cursor:pointer;
 }
 
-h1 { margin-bottom: 10px; }
+.tab.active { background:#222; color:#fff; }
 
-.layout {
+.export-container {
   display: flex;
-  gap: 40px;
+  align-items: center;
+  gap: 10px;
 }
 
-.group {
-  margin-bottom: 25px;
-  display: inline-block;
-  margin-right: 20px;
-}
-
-table {
-  border-collapse: collapse;
-}
-
-td, th {
+.name-input {
+  padding: 8px;
   border: 1px solid #ccc;
-  padding: 4px;
-  text-align: center;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px;
 }
 
-input {
-  width: 40px;
+.btn-export {
+  background:#28a745; 
+  color:white; 
+  border:none; 
+  padding:8px 12px; 
+  border-radius: 4px;
+  cursor:pointer;
+  font-weight: bold;
+}
+.btn-export:hover { background:#218838; }
+
+.view { display:none; }
+.view.active { display:block; }
+
+.layout { display:flex; flex-wrap:wrap; gap:20px; }
+
+.group { margin:10px; }
+
+table { border-collapse:collapse; }
+
+td,th {
+  border:1px solid #ccc;
+  padding:4px;
+  text-align:center;
 }
 
-.bracket {
-  display: flex;
-  gap: 40px;
-}
+input[type="text"]:not(.name-input) { width:40px; text-align:center; }
 
-.round {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-}
+.bracket { display:flex; gap:20px; flex-wrap:nowrap; overflow-x:auto; padding-bottom: 20px; }
+
+.round { display:flex; flex-direction:column; justify-content:center; }
 
 .match {
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin: 10px 0;
-  min-width: 150px;
-  text-align: center;
+  border:1px solid #ccc;
+  padding:6px;
+  margin:5px 0;
+  min-width:220px;
+  text-align:center;
+  background:#f9f9f9;
 }
 
-.winner {
-  margin-top: 5px;
-  font-weight: bold;
-  color: green;
-}
+.winner { color:green; font-weight:bold; margin-top:3px; }
 
+button { margin:5px; padding: 6px 10px; cursor: pointer; }
 </style>
 </head>
 
 <body>
 
-<h1>World Cup Predictor (Score-Based Engine)</h1>
+<h1>48-Team World Cup Engine (Authentic 2026 Rules)</h1>
 
-<label>Name: <input id="user"></label>
+<div class="header-controls">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(event,0)">Matches</div>
+    <div class="tab" onclick="switchTab(event,1)">Standings</div>
+    <div class="tab" onclick="switchTab(event,2)">Knockout</div>
+  </div>
+  <div class="export-container">
+    <input type="text" id="userName" class="name-input" placeholder="Enter your name">
+    <button class="btn-export" onclick="exportCSV()">📥 Export to CSV</button>
+  </div>
+</div>
 
-<div class="layout">
+<div class="view active" id="tab0">
+<button onclick="simulateGroupStage()">🎲 Simulate Group Stage</button>
+<div id="matchInput" class="layout"></div>
+</div>
 
-<div id="groups"></div>
+<div class="view" id="tab1">
+<div id="standings" class="layout"></div>
+</div>
 
-<div>
-<h2>Knockout Bracket</h2>
+<div class="view" id="tab2">
+<button onclick="simulateKnockout()">🎲 Simulate Knockout</button>
 <div id="bracket" class="bracket"></div>
 </div>
 
-</div>
-
-<button onclick="exportCSV()">Export CSV</button>
-
 <script>
 
-/* ---------------- GROUP DATA ---------------- */
+/* ================= TEAM DATA ================= */
 
-const groups = {
- A:["A1","A2","A3","A4"],
- B:["B1","B2","B3","B4"],
- C:["C1","C2","C3","C4"],
- D:["D1","D2","D3","D4"],
- E:["E1","E2","E3","E4"],
- F:["F1","F2","F3","F4"],
- G:["G1","G2","G3","G4"],
- H:["H1","H2","H3","H4"]
+const teamData = {
+A1:{name:"Mexico",flag:"🇲🇽"}, A2:{name:"South Africa",flag:"🇿🇦"}, A3:{name:"South Korea",flag:"🇰🇷"}, A4:{name:"Czech Republic",flag:"🇨🇿"},
+B1:{name:"Canada",flag:"🇨🇦"}, B2:{name:"Bosnia",flag:"🇧🇦"}, B3:{name:"Qatar",flag:"🇶🇦"}, B4:{name:"Switzerland",flag:"🇨🇭"},
+C1:{name:"Brazil",flag:"🇧🇷"}, C2:{name:"Morocco",flag:"🇲🇦"}, C3:{name:"Haiti",flag:"🇭🇹"}, C4:{name:"Scotland",flag:"🏴"},
+D1:{name:"USA",flag:"🇺🇸"}, D2:{name:"Paraguay",flag:"🇵🇾"}, D3:{name:"Australia",flag:"🇦🇺"}, D4:{name:"Turkey",flag:"🇹🇷"},
+E1:{name:"Germany",flag:"🇩🇪"}, E2:{name:"Curaçao",flag:"🇨🇼"}, E3:{name:"Ivory Coast",flag:"🇨🇮"}, E4:{name:"Ecuador",flag:"🇪🇨"},
+F1:{name:"Netherlands",flag:"🇳🇱"}, F2:{name:"Japan",flag:"🇯🇵"}, F3:{name:"Sweden",flag:"🇸🇪"}, F4:{name:"Tunisia",flag:"🇹🇳"},
+G1:{name:"Belgium",flag:"🇧🇪"}, G2:{name:"Egypt",flag:"🇪🇬"}, G3:{name:"Iran",flag:"🇮🇷"}, G4:{name:"New Zealand",flag:"🇳🇿"},
+H1:{name:"Spain",flag:"🇪🇸"}, H2:{name:"Cape Verde",flag:"🇨🇻"}, H3:{name:"Saudi Arabia",flag:"🇸🇦"}, H4:{name:"Uruguay",flag:"🇺🇾"},
+I1:{name:"France",flag:"🇫🇷"}, I2:{name:"Senegal",flag:"🇸🇳"}, I3:{name:"Iraq",flag:"🇮🇶"}, I4:{name:"Norway",flag:"🇳🇴"},
+J1:{name:"Argentina",flag:"🇦🇷"}, J2:{name:"Algeria",flag:"🇩🇿"}, J3:{name:"Austria",flag:"🇦🇹"}, J4:{name:"Jordan",flag:"🇯🇴"},
+K1:{name:"Portugal",flag:"🇵🇹"}, K2:{name:"DR Congo",flag:"🇨🇩"}, K3:{name:"Uzbekistan",flag:"🇺🇿"}, K4:{name:"Colombia",flag:"🇨🇴"},
+L1:{name:"England",flag:"🏴"}, L2:{name:"Croatia",flag:"🇭🇷"}, L3:{name:"Ghana",flag:"🇬🇭"}, L4:{name:"Panama",flag:"🇵🇦"}
 };
 
-let matches = [];
-let knockout = { R16:[], QF:[], SF:[], F:[] };
+function display(id){
+if(!id || !teamData[id]) return "TBD";
+return `${teamData[id].flag} ${teamData[id].name}`;
+}
 
-/* ---------------- FIXTURES ---------------- */
+/* ================= GROUPS ================= */
 
-function genFixtures(team, g){
- return [
-  [team[0],team[1]],
-  [team[2],team[3]],
-  [team[0],team[2]],
-  [team[1],team[3]],
-  [team[0],team[3]],
-  [team[1],team[2]]
- ].map((m,i)=>({
-  id:`${g}${i+1}`,
-  group:g,
-  home:m[0],
-  away:m[1],
-  hg:"",
-  ag:""
- }));
+const groups = {
+A:["A1","A2","A3","A4"], B:["B1","B2","B3","B4"],
+C:["C1","C2","C3","C4"], D:["D1","D2","D3","D4"],
+E:["E1","E2","E3","E4"], F:["F1","F2","F3","F4"],
+G:["G1","G2","G3","G4"], H:["H1","H2","H3","H4"],
+I:["I1","I2","I3","I4"], J:["J1","J2","J3","J4"],
+K:["K1","K2","K3","K4"], L:["L1","L2","L3","L4"]
+};
+
+let matches=[];
+
+let knockout = {
+R32:[], R16:[], QF:[], SF:[], F:[], P3:[]
+};
+
+/* ================= FIXTURES ================= */
+
+function genFixtures(t,g){
+return [
+[t[0],t[1]],[t[2],t[3]],
+[t[0],t[2]],[t[1],t[3]],
+[t[0],t[3]],[t[1],t[2]]
+].map((m,i)=>({
+id:`Group${g}_M${i+1}`,
+group:g,
+home:m[0],
+away:m[1],
+hg:"",
+ag:""
+}));
 }
 
 Object.entries(groups).forEach(([g,t])=>{
- matches.push(...genFixtures(t,g));
+matches.push(...genFixtures(t,g));
 });
 
-/* ---------------- SCORE INPUT ---------------- */
+/* ================= TAB ================= */
+
+function switchTab(e,i){
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+
+document.getElementById("tab"+i).classList.add("active");
+e.currentTarget.classList.add("active");
+}
+
+/* ================= SCORE UPDATE ================= */
 
 function setScore(id,type,val){
- let m = matches.find(x=>x.id===id);
- m[type] = val === "" ? "" : Number(val);
- update();
+let m = matches.find(x=>x.id===id);
+
+if(!m){
+for(let r in knockout){
+m = knockout[r].find(x=>x.id===id);
+if(m) break;
+}
 }
 
-/* ---------------- GROUP TABLE ---------------- */
-
-function table(group){
- let t={};
- groups[group].forEach(x=>t[x]={pts:0,gd:0});
-
- matches.filter(m=>m.group===group).forEach(m=>{
-  if(m.hg===""||m.ag==="") return;
-
-  t[m.home].gd += m.hg - m.ag;
-  t[m.away].gd += m.ag - m.hg;
-
-  if(m.hg > m.ag) t[m.home].pts += 3;
-  else if(m.ag > m.hg) t[m.away].pts += 3;
-  else {
-    t[m.home].pts += 1;
-    t[m.away].pts += 1;
-  }
- });
-
- return Object.entries(t)
-  .sort((a,b)=>b[1].pts - a[1].pts || b[1].gd - a[1].gd)
-  .map(x=>x[0]);
+if(!m) return;
+m[type] = val===""?"":Number(val);
+update();
 }
 
-/* ---------------- R16 BUILD ---------------- */
+/* ================= GROUP TABLE ================= */
 
-function buildR16(w){
- knockout.R16 = [
-  [w.A[0],w.B[1]],
-  [w.C[0],w.D[1]],
-  [w.E[0],w.F[1]],
-  [w.G[0],w.H[1]],
-  [w.B[0],w.A[1]],
-  [w.D[0],w.C[1]],
-  [w.F[0],w.E[1]],
-  [w.H[0],w.G[1]]
- ].map((m,i)=>({
-  id:"R16_"+i,
-  home:m[0],
-  away:m[1],
-  hg:"",
-  ag:"",
-  winner:null
- }));
+function table(g){
+let t={};
+groups[g].forEach(x=>t[x]={pts:0,gd:0,gs:0});
+
+matches.filter(m=>m.group===g).forEach(m=>{
+if(m.hg===""||m.ag==="") return;
+
+t[m.home].gs+=m.hg;
+t[m.away].gs+=m.ag;
+
+t[m.home].gd+=m.hg-m.ag;
+t[m.away].gd+=m.ag-m.hg;
+
+if(m.hg>m.ag) t[m.home].pts+=3;
+else if(m.ag>m.hg) t[m.away].pts+=3;
+else {t[m.home].pts++; t[m.away].pts++;}
+});
+
+return Object.entries(t)
+.sort((a,b)=>b[1].pts-a[1].pts||b[1].gd-a[1].gd||b[1].gs-a[1].gs);
 }
 
-/* ---------------- WINNER LOGIC ---------------- */
+/* ================= QUALIFICATION ================= */
 
-function getWinner(m){
- if(m.hg===""||m.ag==="") return null;
- if(m.hg > m.ag) return m.home;
- if(m.ag > m.hg) return m.away;
- return null; // no penalties implemented yet
+function getQualified(){
+let standings = {};
+let third = [];
+
+for(let g in groups){
+let r=table(g);
+standings[`1${g}`] = r[0][0]; // 1st Place Team ID
+standings[`2${g}`] = r[1][0]; // 2nd Place Team ID
+
+third.push({team: r[2][0], stats: r[2][1], group: g});
 }
 
-/* ---------------- PROPAGATION ENGINE ---------------- */
+// Sort the 3rd place teams to find the best 8
+third.sort((a,b) => b.stats.pts - a.stats.pts || b.stats.gd - a.stats.gd || b.stats.gs - a.stats.gs);
 
-function propagate(){
-
- // R16 → QF
- let r16w = knockout.R16.map(getWinner);
- if(r16w.includes(null)) return;
-
- knockout.QF = [
-  [r16w[0],r16w[1]],
-  [r16w[2],r16w[3]],
-  [r16w[4],r16w[5]],
-  [r16w[6],r16w[7]]
- ].map((m,i)=>({
-  id:"QF_"+i,
-  home:m[0],
-  away:m[1],
-  hg:"",
-  ag:""
- }));
-
- let qfw = knockout.QF.map(getWinner);
- if(qfw.includes(null)) return;
-
- knockout.SF = [
-  [qfw[0],qfw[1]],
-  [qfw[2],qfw[3]]
- ].map((m,i)=>({
-  id:"SF_"+i,
-  home:m[0],
-  away:m[1],
-  hg:"",
-  ag:""
- }));
-
- let sfw = knockout.SF.map(getWinner);
- if(sfw.includes(null)) return;
-
- knockout.F = [{
-  id:"F_0",
-  home:sfw[0],
-  away:sfw[1],
-  hg:"",
-  ag:"",
-  winner:null
- }];
+return {
+standings: standings,
+best3: third.slice(0,8)
+};
 }
 
-/* ---------------- GROUP RENDER ---------------- */
+/* ================= 3RD PLACE MATCHMAKER ================= */
 
-function renderGroups(){
- let div=document.getElementById("groups");
- div.innerHTML="";
+// DFS Algorithm to dynamically match 3rd place teams to group winners 
+// without needing a hardcoded 495-line matrix.
+function assignThirds(best3Teams) {
+let slots = ["1D", "1G", "1K", "1L", "1A", "1B", "1E", "1I"];
+let solution = null;
 
- Object.keys(groups).forEach(g=>{
-  let box=document.createElement("div");
-  box.className="group";
-
-  let html=`<h3>Group ${g}</h3><table>`;
-
-  matches.filter(m=>m.group===g).forEach(m=>{
-   html+=`
-   <tr>
-    <td>${m.home}</td>
-    <td><input value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)"></td>
-    <td>-</td>
-    <td><input value="${m.ag}" onchange="setScore('${m.id}','ag',this.value)"></td>
-    <td>${m.away}</td>
-   </tr>`;
-  });
-
-  html += "</table><div id='t"+g+"'></div>";
-
-  box.innerHTML=html;
-  div.appendChild(box);
- });
-
- update();
+function backtrack(index, currentAssignment) {
+if (solution) return;
+if (index === 8) {
+solution = [...currentAssignment];
+return;
 }
 
-/* ---------------- BRACKET RENDER ---------------- */
+let slotGroup = slots[index].charAt(1); 
 
-function renderBracket(){
- let div=document.getElementById("bracket");
- div.innerHTML="";
-
- function round(name,title){
-  let col=document.createElement("div");
-  col.className="round";
-
-  let h=document.createElement("h3");
-  h.innerText=title;
-  col.appendChild(h);
-
-  (knockout[name]||[]).forEach(m=>{
-   let w = getWinner(m);
-
-   let d=document.createElement("div");
-   d.className="match";
-
-   d.innerHTML=`
-    ${m.home} ${m.hg!==""?m.hg:""} - ${m.ag!==""?m.ag:""} ${m.away}
-    <div class="winner">${w||""}</div>
-   `;
-
-   col.appendChild(d);
-  });
-
-  div.appendChild(col);
- }
-
- round("R16","Round of 16");
- round("QF","Quarter Finals");
- round("SF","Semi Finals");
- round("F","Final");
+for (let i = 0; i < best3Teams.length; i++) {
+let candidate = best3Teams[i];
+// Ensure team is not already assigned AND doesn't play its own group winner
+if (!currentAssignment.includes(candidate)) {
+if (candidate.group !== slotGroup) {
+currentAssignment.push(candidate);
+backtrack(index + 1, currentAssignment);
+currentAssignment.pop();
+}
+}
+}
 }
 
-/* ---------------- UPDATE ENGINE ---------------- */
+backtrack(0, []);
+
+let mapping = {};
+if (solution) {
+for(let i=0; i<8; i++) mapping[slots[i]] = solution[i].team;
+} else {
+// Failsafe if math breaks (should never happen)
+for(let i=0; i<8; i++) mapping[slots[i]] = best3Teams[i].team;
+}
+return mapping;
+}
+
+/* ================= INIT & PAIRING ================= */
+
+function initKnockout(q){
+let thirdMapping = assignThirds(q.best3);
+
+// 2026 Authentic Bracket Structure (Exact FIFA Pathing)
+const r32Blueprint = [
+  // --- LEFT SIDE OF BRACKET ---
+  // Quadrant 1
+  { home: "1A", away: "3rd" },
+  { home: "1L", away: "3rd" },
+  { home: "1C", away: "2F" },
+  { home: "2E", away: "2I" },
+  // Quadrant 2 
+  { home: "1J", away: "2H" },
+  { home: "1B", away: "3rd" },
+  { home: "1K", away: "3rd" },
+  { home: "2D", away: "2G" },
+
+  // --- RIGHT SIDE OF BRACKET ---
+  // Quadrant 3
+  { home: "1E", away: "3rd" },
+  { home: "1I", away: "3rd" },
+  { home: "1F", away: "2C" },
+  { home: "2A", away: "2B" }, 
+  // Quadrant 4
+  { home: "1D", away: "3rd" },
+  { home: "1G", away: "3rd" },
+  { home: "1H", away: "2J" },
+  { home: "2K", away: "2L" }
+];
+
+let newR32Teams = [];
+r32Blueprint.forEach(match => {
+let homeTeam = q.standings[match.home];
+let awayTeam = match.away === "3rd" ? thirdMapping[match.home] : q.standings[match.away];
+newR32Teams.push(homeTeam, awayTeam);
+});
+
+let currentR32Teams = knockout.R32.flatMap(m => [m.home, m.away]);
+let teamsChanged = newR32Teams.length !== currentR32Teams.length || newR32Teams.some((t, i) => t !== currentR32Teams[i]);
+
+if(teamsChanged){
+knockout.R32 = [];
+for(let i=0; i<newR32Teams.length; i+=2) {
+knockout.R32.push({
+id: `R32_M${(i/2)+1}`,
+home: newR32Teams[i],
+away: newR32Teams[i+1],
+hg: "",
+ag: ""
+});
+}
+knockout.R16 = [];
+knockout.QF = [];
+knockout.SF = [];
+knockout.F = [];
+knockout.P3 = [];
+}
+}
+
+function pair(arr,prefix){
+let out=[];
+for(let i=0;i<arr.length;i+=2){
+out.push({
+id:`${prefix}_M${(i/2)+1}`,
+home:arr[i],
+away:arr[i+1],
+hg:"",
+ag:""
+});
+}
+return out;
+}
+
+/* ================= WINNER ================= */
+
+function winner(m){
+if(!m || m.hg==="" || m.ag==="") return null;
+if(m.hg === m.ag) return null; // Ties halt progression until broken
+return m.hg>m.ag ? m.home : m.away;
+}
+
+/* ================= PROGRESSION ================= */
+
+function updateBracketRound(winners, targetRound, prefix) {
+let requiredWinners = 0;
+if(prefix === "R16") requiredWinners = 16;
+if(prefix === "QF") requiredWinners = 8;
+if(prefix === "SF") requiredWinners = 4;
+if(prefix === "F") requiredWinners = 2;
+
+if(winners.length === requiredWinners) {
+let newPairs = pair(winners, prefix);
+if(targetRound.length === 0) {
+return newPairs;
+} else {
+for(let i=0; i<targetRound.length; i++) {
+if(targetRound[i].home !== newPairs[i].home || targetRound[i].away !== newPairs[i].away) {
+targetRound[i].home = newPairs[i].home;
+targetRound[i].away = newPairs[i].away;
+targetRound[i].hg = "";
+targetRound[i].ag = "";
+}
+}
+return targetRound;
+}
+}
+return [];
+}
+
+function progress(){
+function W(list){ return (list||[]).map(winner).filter(Boolean); }
+
+let r32 = W(knockout.R32);
+knockout.R16 = updateBracketRound(r32, knockout.R16, "R16");
+
+let r16 = W(knockout.R16);
+knockout.QF = updateBracketRound(r16, knockout.QF, "QF");
+
+let qf = W(knockout.QF);
+knockout.SF = updateBracketRound(qf, knockout.SF, "SF");
+
+let sf = W(knockout.SF);
+knockout.F = updateBracketRound(sf, knockout.F, "F");
+
+// 3rd Place Progression
+if(sf.length === 2) {
+let losers = knockout.SF.map(m => {
+if(m.hg===""||m.ag===""||m.hg===m.ag) return null;
+return m.hg>m.ag ? m.away : m.home;
+}).filter(Boolean);
+
+if(losers.length === 2) {
+let newP3 = pair(losers, "P3");
+if(knockout.P3.length === 0) {
+knockout.P3 = newP3;
+} else {
+if(knockout.P3[0].home !== newP3[0].home || knockout.P3[0].away !== newP3[0].away) {
+knockout.P3[0].home = newP3[0].home;
+knockout.P3[0].away = newP3[0].away;
+knockout.P3[0].hg = "";
+knockout.P3[0].ag = "";
+}
+}
+} else {
+knockout.P3 = [];
+}
+} else {
+knockout.P3 = [];
+}
+}
+
+/* ================= UPDATE ================= */
 
 function update(){
-
- let winners={};
-
- Object.keys(groups).forEach(g=>{
-  let r=table(g);
-
-  document.getElementById("t"+g).innerHTML =
-    "<b>Standings</b><br>" +
-    r.map((x,i)=>`${i+1}. ${x}`).join("<br>");
-
-  winners[g]=r;
- });
-
- buildR16(winners);
-
- propagate();
-
- renderBracket();
+let q=getQualified();
+initKnockout(q);
+progress();
+renderAll();
 }
 
-/* ---------------- CSV EXPORT ---------------- */
+/* ================= SIM ================= */
 
-function exportCSV(){
-
- let rows=[["match_id","home","away","hg","ag"]];
-
- matches.forEach(m=>{
-  rows.push([m.id,m.home,m.away,m.hg,m.ag]);
- });
-
- Object.values(knockout).flat().forEach(m=>{
-  rows.push([m.id,m.home,m.away,m.hg,m.ag]);
- });
-
- let csv=rows.map(r=>r.join(",")).join("\n");
-
- let a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob([csv]));
- a.download=(document.getElementById("user").value||"user")+"_pred.csv";
- a.click();
+function simulateGroupStage(){
+matches.forEach(m=>{
+m.hg=Math.floor(Math.random()*4);
+m.ag=Math.floor(Math.random()*4);
+});
+update();
 }
 
-/* INIT */
+function simulateKnockout(){
+for(let r in knockout){
+(knockout[r]||[]).forEach(m=>{
+if(m.home && m.away) {
+if(m.hg==="") m.hg=Math.floor(Math.random()*4);
+if(m.ag==="") m.ag=Math.floor(Math.random()*4);
+// Force tiebreaker in simulation so brackets don't stall
+if(m.hg === m.ag) {
+Math.random() > 0.5 ? m.hg++ : m.ag++;
+}
+}
+});
+}
+update();
+}
+
+/* ================= RENDER ================= */
+
+function renderAll(){
 renderGroups();
+renderStandings();
+renderKnockout();
+}
+
+function renderGroups(){
+let div=document.getElementById("matchInput");
+div.innerHTML="";
+
+for(let g in groups){
+let box=document.createElement("div");
+box.className="group";
+
+let html=`<h3>Group ${g}</h3><table>`;
+
+matches.filter(m=>m.group===g).forEach(m=>{
+html+=`
+<tr>
+<td>${display(m.home)}</td>
+<td><input type="text" value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)"></td>
+<td>-</td>
+<td><input type="text" value="${m.ag}" onchange="setScore('${m.id}','ag',this.value)"></td>
+<td>${display(m.away)}</td>
+</tr>`;
+});
+
+html+="</table>";
+box.innerHTML=html;
+div.appendChild(box);
+}
+}
+
+function renderStandings(){
+let div=document.getElementById("standings");
+div.innerHTML="";
+let allThirds = [];
+
+// 1. Render All Standard Group Tables
+for(let g in groups){
+let r=table(g);
+allThirds.push({team: r[2][0], stats: r[2][1], group: g});
+
+let box=document.createElement("div");
+box.className="group";
+
+let html=`<h3>Group ${g}</h3>
+<table>
+<tr><th>Team</th><th>Pts</th><th>GD</th><th>GS</th></tr>`;
+
+r.forEach(x=>{
+html+=`
+<tr>
+<td>${display(x[0])}</td>
+<td>${x[1].pts}</td>
+<td>${x[1].gd}</td>
+<td>${x[1].gs}</td>
+</tr>`;
+});
+
+html+="</table>";
+box.innerHTML=html;
+div.appendChild(box);
+}
+
+// 2. Render 3rd Place Verification Table
+allThirds.sort((a,b) => b.stats.pts - a.stats.pts || b.stats.gd - a.stats.gd || b.stats.gs - a.stats.gs);
+
+let thirdBox = document.createElement("div");
+thirdBox.style.flexBasis = "100%"; 
+thirdBox.style.marginTop = "30px";
+thirdBox.style.padding = "15px";
+thirdBox.style.background = "#f4f4f4";
+thirdBox.style.borderRadius = "8px";
+thirdBox.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+
+let tHtml = `<h2>🥉 3rd Place Wildcard Rankings</h2>
+<p style="font-size:14px; color:#555;">The top 8 third-place teams advance to the Round of 32. 
+<b>Tiebreakers:</b> Points &gt; Goal Difference &gt; Goals Scored.</p>
+<table style="width:100%; max-width:800px; background:#fff; text-align:center;">
+<tr style="background:#ddd;">
+  <th>Rank</th>
+  <th>Group</th>
+  <th style="text-align:left;">Team</th>
+  <th>Points</th>
+  <th>Goal Diff</th>
+  <th>Goals Scored</th>
+  <th>Status</th>
+</tr>`;
+
+allThirds.forEach((x, i) => {
+let isQual = i < 8;
+let status = isQual ? "<span style='color:green; font-weight:bold;'>✅ Advanced</span>" : "<span style='color:#c0392b; font-weight:bold;'>❌ Eliminated</span>";
+let bg = isQual ? "#e8f5e9" : "#ffebee";
+
+tHtml += `
+<tr style="background:${bg};">
+  <td style="font-weight:bold;">${i+1}</td>
+  <td>${x.group}</td>
+  <td style="text-align:left;">${display(x.team)}</td>
+  <td style="font-weight:bold;">${x.stats.pts}</td>
+  <td>${x.stats.gd}</td>
+  <td>${x.stats.gs}</td>
+  <td>${status}</td>
+</tr>`;
+});
+
+tHtml += `</table>`;
+thirdBox.innerHTML = tHtml;
+div.appendChild(thirdBox);
+}
+
+function renderKnockout(){
+let div=document.getElementById("bracket");
+div.innerHTML="";
+
+function createMatchCard(m) {
+let w = winner(m);
+return `
+<div class="match">
+${display(m.home)} <input type="text" value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)"> -
+<input type="text" value="${m.ag}" onchange="setScore('${m.id}','ag',this.value)">
+${display(m.away)}
+<div class="winner">${w?display(w):""}</div>
+</div>
+`;
+}
+
+function renderRound(name, list) {
+if(!list || list.length === 0) return;
+let col = document.createElement("div");
+col.className = "round";
+col.innerHTML = `<h3>${name}</h3>`;
+list.forEach(m => col.innerHTML += createMatchCard(m));
+div.appendChild(col);
+}
+
+// Render Standard Rounds
+renderRound("Round of 32", knockout.R32);
+renderRound("Round of 16", knockout.R16);
+renderRound("Quarter Finals", knockout.QF);
+renderRound("Semi Finals", knockout.SF);
+
+// Combined Finals & 3rd Place Column
+if ((knockout.F && knockout.F.length > 0) || (knockout.P3 && knockout.P3.length > 0)) {
+let finalsCol = document.createElement("div");
+finalsCol.className = "round";
+
+if (knockout.F && knockout.F.length > 0) {
+finalsCol.innerHTML += `<h3>Final</h3>`;
+finalsCol.innerHTML += createMatchCard(knockout.F[0]);
+}
+
+if (knockout.P3 && knockout.P3.length > 0) {
+finalsCol.innerHTML += `<h3 style="margin-top: 30px;">3rd Place</h3>`; 
+finalsCol.innerHTML += createMatchCard(knockout.P3[0]);
+}
+
+div.appendChild(finalsCol);
+}
+}
+
+/* ================= CSV EXPORT ================= */
+
+function exportCSV() {
+let csvContent = "Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name\n";
+
+function addMatchToCSV(stage, m) {
+if(!m || !m.home || !m.away) return;
+
+let matchId = m.id;
+let hId = m.home;
+let aId = m.away;
+let hName = teamData[m.home] ? teamData[m.home].name : m.home;
+let aName = teamData[m.away] ? teamData[m.away].name : m.away;
+let hGoals = m.hg !== "" ? m.hg : "-";
+let aGoals = m.ag !== "" ? m.ag : "-";
+
+let wId = "Pending";
+let wName = "Pending";
+let w = winner(m);
+
+if(w && teamData[w]) {
+wId = w;
+wName = teamData[w].name;
+} else if (hGoals === "-" && aGoals === "-") {
+wId = "Not Played";
+wName = "Not Played";
+} else if (hGoals === aGoals && hGoals !== "-") {
+wId = "Draw";
+wName = "Draw";
+}
+
+csvContent += `"${matchId}","${stage}","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
+}
+
+// Group Matches
+matches.forEach(m => addMatchToCSV(`Group ${m.group}`, m));
+
+// Knockout Matches
+if(knockout.R32) knockout.R32.forEach(m => addMatchToCSV("Round of 32", m));
+if(knockout.R16) knockout.R16.forEach(m => addMatchToCSV("Round of 16", m));
+if(knockout.QF) knockout.QF.forEach(m => addMatchToCSV("Quarter Finals", m));
+if(knockout.SF) knockout.SF.forEach(m => addMatchToCSV("Semi Finals", m));
+if(knockout.P3 && knockout.P3.length > 0) addMatchToCSV("3rd Place", knockout.P3[0]);
+if(knockout.F && knockout.F.length > 0) addMatchToCSV("Final", knockout.F[0]);
+
+// Get User Name and format file name safely
+let userNameInput = document.getElementById("userName").value.trim();
+let safeUserName = userNameInput.replace(/[^a-zA-Z0-9-]/g, '_');
+let downloadName = safeUserName ? `${safeUserName}_world_cup_predictions.csv` : "world_cup_predictions.csv";
+
+// Create Download
+let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+let link = document.createElement("a");
+let url = URL.createObjectURL(blob);
+link.setAttribute("href", url);
+link.setAttribute("download", downloadName);
+link.style.visibility = 'hidden';
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+}
+
+/* ================= INIT ================= */
+
+update();
 
 </script>
 
