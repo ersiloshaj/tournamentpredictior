@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Predictor (Score-Based)</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+h1 { margin-bottom: 10px; }
+
+.layout {
+  display: flex;
+  gap: 40px;
+}
+
+.group {
+  margin-bottom: 25px;
+  display: inline-block;
+  margin-right: 20px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid #ccc;
+  padding: 4px;
+  text-align: center;
+}
+
+input {
+  width: 40px;
+}
+
+.bracket {
+  display: flex;
+  gap: 40px;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.match {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin: 10px 0;
+  min-width: 150px;
+  text-align: center;
+}
+
+.winner {
+  margin-top: 5px;
+  font-weight: bold;
+  color: green;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>World Cup Predictor (Score-Based Engine)</h1>
+
+<label>Name: <input id="user"></label>
+
+<div class="layout">
+
+<div id="groups"></div>
+
+<div>
+<h2>Knockout Bracket</h2>
+<div id="bracket" class="bracket"></div>
+</div>
+
+</div>
+
+<button onclick="exportCSV()">Export CSV</button>
+
+<script>
+
+/* ---------------- GROUP DATA ---------------- */
+
+const groups = {
+ A:["A1","A2","A3","A4"],
+ B:["B1","B2","B3","B4"],
+ C:["C1","C2","C3","C4"],
+ D:["D1","D2","D3","D4"],
+ E:["E1","E2","E3","E4"],
+ F:["F1","F2","F3","F4"],
+ G:["G1","G2","G3","G4"],
+ H:["H1","H2","H3","H4"]
+};
+
+let matches = [];
+let knockout = { R16:[], QF:[], SF:[], F:[] };
+
+/* ---------------- FIXTURES ---------------- */
+
+function genFixtures(team, g){
+ return [
+  [team[0],team[1]],
+  [team[2],team[3]],
+  [team[0],team[2]],
+  [team[1],team[3]],
+  [team[0],team[3]],
+  [team[1],team[2]]
+ ].map((m,i)=>({
+  id:`${g}${i+1}`,
+  group:g,
+  home:m[0],
+  away:m[1],
+  hg:"",
+  ag:""
+ }));
+}
+
+Object.entries(groups).forEach(([g,t])=>{
+ matches.push(...genFixtures(t,g));
+});
+
+/* ---------------- SCORE INPUT ---------------- */
+
+function setScore(id,type,val){
+ let m = matches.find(x=>x.id===id);
+ m[type] = val === "" ? "" : Number(val);
+ update();
+}
+
+/* ---------------- GROUP TABLE ---------------- */
+
+function table(group){
+ let t={};
+ groups[group].forEach(x=>t[x]={pts:0,gd:0});
+
+ matches.filter(m=>m.group===group).forEach(m=>{
+  if(m.hg===""||m.ag==="") return;
+
+  t[m.home].gd += m.hg - m.ag;
+  t[m.away].gd += m.ag - m.hg;
+
+  if(m.hg > m.ag) t[m.home].pts += 3;
+  else if(m.ag > m.hg) t[m.away].pts += 3;
+  else {
+    t[m.home].pts += 1;
+    t[m.away].pts += 1;
+  }
+ });
+
+ return Object.entries(t)
+  .sort((a,b)=>b[1].pts - a[1].pts || b[1].gd - a[1].gd)
+  .map(x=>x[0]);
+}
+
+/* ---------------- R16 BUILD ---------------- */
+
+function buildR16(w){
+ knockout.R16 = [
+  [w.A[0],w.B[1]],
+  [w.C[0],w.D[1]],
+  [w.E[0],w.F[1]],
+  [w.G[0],w.H[1]],
+  [w.B[0],w.A[1]],
+  [w.D[0],w.C[1]],
+  [w.F[0],w.E[1]],
+  [w.H[0],w.G[1]]
+ ].map((m,i)=>({
+  id:"R16_"+i,
+  home:m[0],
+  away:m[1],
+  hg:"",
+  ag:"",
+  winner:null
+ }));
+}
+
+/* ---------------- WINNER LOGIC ---------------- */
+
+function getWinner(m){
+ if(m.hg===""||m.ag==="") return null;
+ if(m.hg > m.ag) return m.home;
+ if(m.ag > m.hg) return m.away;
+ return null; // no penalties implemented yet
+}
+
+/* ---------------- PROPAGATION ENGINE ---------------- */
+
+function propagate(){
+
+ // R16 → QF
+ let r16w = knockout.R16.map(getWinner);
+ if(r16w.includes(null)) return;
+
+ knockout.QF = [
+  [r16w[0],r16w[1]],
+  [r16w[2],r16w[3]],
+  [r16w[4],r16w[5]],
+  [r16w[6],r16w[7]]
+ ].map((m,i)=>({
+  id:"QF_"+i,
+  home:m[0],
+  away:m[1],
+  hg:"",
+  ag:""
+ }));
+
+ let qfw = knockout.QF.map(getWinner);
+ if(qfw.includes(null)) return;
+
+ knockout.SF = [
+  [qfw[0],qfw[1]],
+  [qfw[2],qfw[3]]
+ ].map((m,i)=>({
+  id:"SF_"+i,
+  home:m[0],
+  away:m[1],
+  hg:"",
+  ag:""
+ }));
+
+ let sfw = knockout.SF.map(getWinner);
+ if(sfw.includes(null)) return;
+
+ knockout.F = [{
+  id:"F_0",
+  home:sfw[0],
+  away:sfw[1],
+  hg:"",
+  ag:"",
+  winner:null
+ }];
+}
+
+/* ---------------- GROUP RENDER ---------------- */
+
+function renderGroups(){
+ let div=document.getElementById("groups");
+ div.innerHTML="";
+
+ Object.keys(groups).forEach(g=>{
+  let box=document.createElement("div");
+  box.className="group";
+
+  let html=`<h3>Group ${g}</h3><table>`;
+
+  matches.filter(m=>m.group===g).forEach(m=>{
+   html+=`
+   <tr>
+    <td>${m.home}</td>
+    <td><input value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)"></td>
+    <td>-</td>
+    <td><input value="${m.ag}" onchange="setScore('${m.id}','ag',this.value)"></td>
+    <td>${m.away}</td>
+   </tr>`;
+  });
+
+  html += "</table><div id='t"+g+"'></div>";
+
+  box.innerHTML=html;
+  div.appendChild(box);
+ });
+
+ update();
+}
+
+/* ---------------- BRACKET RENDER ---------------- */
+
+function renderBracket(){
+ let div=document.getElementById("bracket");
+ div.innerHTML="";
+
+ function round(name,title){
+  let col=document.createElement("div");
+  col.className="round";
+
+  let h=document.createElement("h3");
+  h.innerText=title;
+  col.appendChild(h);
+
+  (knockout[name]||[]).forEach(m=>{
+   let w = getWinner(m);
+
+   let d=document.createElement("div");
+   d.className="match";
+
+   d.innerHTML=`
+    ${m.home} ${m.hg!==""?m.hg:""} - ${m.ag!==""?m.ag:""} ${m.away}
+    <div class="winner">${w||""}</div>
+   `;
+
+   col.appendChild(d);
+  });
+
+  div.appendChild(col);
+ }
+
+ round("R16","Round of 16");
+ round("QF","Quarter Finals");
+ round("SF","Semi Finals");
+ round("F","Final");
+}
+
+/* ---------------- UPDATE ENGINE ---------------- */
+
+function update(){
+
+ let winners={};
+
+ Object.keys(groups).forEach(g=>{
+  let r=table(g);
+
+  document.getElementById("t"+g).innerHTML =
+    "<b>Standings</b><br>" +
+    r.map((x,i)=>`${i+1}. ${x}`).join("<br>");
+
+  winners[g]=r;
+ });
+
+ buildR16(winners);
+
+ propagate();
+
+ renderBracket();
+}
+
+/* ---------------- CSV EXPORT ---------------- */
+
+function exportCSV(){
+
+ let rows=[["match_id","home","away","hg","ag"]];
+
+ matches.forEach(m=>{
+  rows.push([m.id,m.home,m.away,m.hg,m.ag]);
+ });
+
+ Object.values(knockout).flat().forEach(m=>{
+  rows.push([m.id,m.home,m.away,m.hg,m.ag]);
+ });
+
+ let csv=rows.map(r=>r.join(",")).join("\n");
+
+ let a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([csv]));
+ a.download=(document.getElementById("user").value||"user")+"_pred.csv";
+ a.click();
+}
+
+/* INIT */
+renderGroups();
+
+</script>
+
+</body>
+</html>
