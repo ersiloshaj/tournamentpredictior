@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Prediction League - Scorer</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+  .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #222; }
+  .upload-section { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+  .upload-row { margin-bottom: 15px; }
+  label { font-weight: bold; display: block; margin-bottom: 5px; }
+  input[type="file"] { display: block; margin-bottom: 10px; }
+  button { background: #0056b3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+  button:hover { background: #004494; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+  th { background: #222; color: white; }
+  .rank-1 { background: #ffd700; font-weight: bold; } /* Gold */
+  .rank-2 { background: #c0c0c0; font-weight: bold; } /* Silver */
+  .rank-3 { background: #cd7f32; font-weight: bold; } /* Bronze */
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🏆 Prediction League Leaderboard 🏆</h1>
+  
+  <div class="upload-section">
+    <div class="upload-row">
+      <label>1. Upload the MASTER (Real Results) CSV:</label>
+      <input type="file" id="masterFile" accept=".csv">
+    </div>
+    <div class="upload-row">
+      <label>2. Upload all PLAYER CSVs (You can select multiple at once):</label>
+      <input type="file" id="playerFiles" accept=".csv" multiple>
+    </div>
+    <button onclick="calculateScores()">📊 Calculate Leaderboard</button>
+  </div>
+
+  <div id="resultsArea"></div>
+</div>
+
+<script>
+// Helper to parse CSV text into an array of objects
+function parseCSV(text) {
+  let lines = text.trim().split("\n");
+  let headers = lines[0].split(",").map(h => h.replace(/"/g, '').trim());
+  let data = [];
+  
+  for(let i=1; i<lines.length; i++){
+    // Handles commas inside quotes if they exist
+    let row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(",");
+    let obj = {};
+    headers.forEach((h, index) => {
+      let val = row[index] ? row[index].replace(/"/g, '').trim() : "";
+      obj[h] = val;
+    });
+    data.push(obj);
+  }
+  return data;
+}
+
+// Helper to read file asynchronously
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = e => resolve({ name: file.name, content: e.target.result });
+    reader.onerror = e => reject(e);
+    reader.readAsText(file);
+  });
+}
+
+async function calculateScores() {
+  const masterInput = document.getElementById('masterFile');
+  const playerInputs = document.getElementById('playerFiles');
+
+  if (masterInput.files.length === 0) {
+    alert("Please upload the Master Results CSV first!");
+    return;
+  }
+  if (playerInputs.files.length === 0) {
+    alert("Please upload at least one Player CSV!");
+    return;
+  }
+
+  // 1. Load and parse the master file
+  const masterFile = await readFile(masterInput.files[0]);
+  const masterData = parseCSV(masterFile.content);
+  
+  // Create a dictionary of actual results { "Match ID": {hg, ag, winner} }
+  let actuals = {};
+  masterData.forEach(match => {
+    if(match["Home Goals"] !== "-" && match["Away Goals"] !== "-") {
+      actuals[match["Match ID"]] = {
+        hg: parseInt(match["Home Goals"]),
+        ag: parseInt(match["Away Goals"]),
+        winnerId: match["Winner ID"]
+      };
+    }
+  });
+
+  // 2. Process all player files
+  let leaderboard = [];
+
+  for (let i = 0; i < playerInputs.files.length; i++) {
+    let pFile = await readFile(playerInputs.files[i]);
+    let pData = parseCSV(pFile.content);
+    
+    // Extract player name from filename (removes _world_cup_predictions.csv)
+    let playerName = pFile.name.replace(/_?world_cup_predictions.*\.csv/i, '').replace(/_/g, ' ');
+    if(playerName === "") playerName = `Player ${i+1}`;
+
+    let totalPoints = 0;
+    let exactScores = 0;
+    let correctResults = 0;
+
+    pData.forEach(pMatch => {
+      let mId = pMatch["Match ID"];
+      
+      // Only score matches that have actually been played in the master file
+      if(actuals[mId] && pMatch["Home Goals"] !== "-" && pMatch["Away Goals"] !== "-") {
+        let actualHG = actuals[mId].hg;
+        let actualAG = actuals[mId].ag;
+        
+        let playerHG = parseInt(pMatch["Home Goals"]);
+        let playerAG = parseInt(pMatch["Away Goals"]);
+
+        // EXACT SCORE (3 Points)
+        if (playerHG === actualHG && playerAG === actualAG) {
+          totalPoints += 3;
+          exactScores += 1;
+        } 
+        // CORRECT RESULT (1 Point)
+        else {
+          let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
+          let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
+          
+          if (actualResult === playerResult) {
+            totalPoints += 1;
+            correctResults += 1;
+          }
+        }
+      }
+    });
+
+    leaderboard.push({ name: playerName, points: totalPoints, exact: exactScores, results: correctResults });
+  }
+
+  // 3. Sort Leaderboard (Points -> Exact Scores -> Correct Results)
+  leaderboard.sort((a, b) => b.points - a.points || b.exact - a.exact || b.results - a.results);
+
+  // 4. Render the Table
+  let html = `<table>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player Name</th>
+                  <th>Total Points</th>
+                  <th>Exact Scores (3pts)</th>
+                  <th>Correct Results (1pt)</th>
+                </tr>`;
+  
+  leaderboard.forEach((player, index) => {
+    let rankClass = "";
+    if(index === 0) rankClass = "rank-1";
+    else if(index === 1) rankClass = "rank-2";
+    else if(index === 2) rankClass = "rank-3";
+
+    html += `<tr class="${rankClass}">
+               <td>${index + 1}</td>
+               <td style="font-weight:bold;">${player.name}</td>
+               <td style="font-size:1.2em; font-weight:bold;">${player.points}</td>
+               <td>${player.exact}</td>
+               <td>${player.results}</td>
+             </tr>`;
+  });
+
+  html += `</table>`;
+  document.getElementById('resultsArea').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
