@@ -143,8 +143,17 @@ async function runLeagueScorer() {
     for (let i = 0; i < playerTexts.length; i++) {
       let pData = parseCSV(playerTexts[i].content);
       
-      let playerName = playerTexts[i].name.replace('.csv', '').replace(/_/g, ' ');
+    // Clean up filename to create a nice player name
+    let playerName = playerTexts[i].name
+      .replace(/\.csv$/i, '') // 1. Remove the .csv extension
+      .replace(/[-_\s]*(world[-_\s]*cup[-_\s]*)?predictions/i, '') // 2. Remove "world cup predictions" or "predictions"
+      .replace(/_/g, ' ') // 3. Replace any leftover underscores with spaces
+      .trim(); // 4. Remove any extra spaces at the beginning or end
+
+    // Capitalize the first letter (e.g., "ersi" -> "Ersi")
+    if (playerName.length > 0) {
       playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+    }
 
       let totalPoints = 0, exactScores = 0, correctResults = 0;
 
