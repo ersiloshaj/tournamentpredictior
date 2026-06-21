@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Prediction League</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+  .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #222; }
+  
+  .admin-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 2px solid #ccc; }
+  .admin-panel h3 { margin-top: 0; color: #0056b3; }
+  label { font-weight: bold; display: block; margin-bottom: 5px; }
+  input[type="file"] { display: block; margin-bottom: 15px; }
+  button { background: #0056b3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+  button:hover { background: #004494; }
+  
+  .status { text-align: center; font-style: italic; color: #666; margin-bottom: 20px; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+  th { background: #222; color: white; }
+  .rank-1 { background: #ffd700; font-weight: bold; } /* Gold */
+  .rank-2 { background: #c0c0c0; font-weight: bold; } /* Silver */
+  .rank-3 { background: #cd7f32; font-weight: bold; } /* Bronze */
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🏆 Prediction League Leaderboard 🏆</h1>
+  
+  <div class="admin-panel">
+    <h3>Admin Control</h3>
+    <label for="masterFile">1. Upload your local MASTER Results CSV:</label>
+    <input type="file" id="masterFile" accept=".csv">
+    
+    <button onclick="runLeagueScorer()">📊 Calculate Scores</button>
+  </div>
+
+  <div id="statusMessage" class="status" style="display:none;"></div>
+  <div id="resultsArea"></div>
+</div>
+
+<script>
+// ==========================================
+// ⚙️ GITHUB CONFIGURATION ⚙️
+// ==========================================
+const GITHUB_USERNAME = "ersiloshaj"; 
+const GITHUB_REPO = "tournamentpredictior"; 
+
+
+// 1. Helper to parse CSV text
+function parseCSV(text) {
+  let lines = text.trim().split("\n");
+  let headers = lines[0].split(",").map(h => h.replace(/"/g, '').trim());
+  let data = [];
+  for(let i=1; i<lines.length; i++){
+    let row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(",");
+    let obj = {};
+    headers.forEach((h, index) => {
+      let val = row[index] ? row[index].replace(/"/g, '').trim() : "";
+      obj[h] = val;
+    });
+    data.push(obj);
+  }
+  return data;
+}
+
+// 2. Helper to read the LOCAL Master file
+function readLocalFile(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = e => reject(e);
+    reader.readAsText(file);
+  });
+}
+
+// Main function triggered by the button
+async function runLeagueScorer() {
+  const masterInput = document.getElementById('masterFile');
+  const statusEl = document.getElementById('statusMessage');
+  const resultsArea = document.getElementById('resultsArea');
+
+  if (masterInput.files.length === 0) {
+    alert("Please upload the Master Results CSV first!");
+    return;
+  }
+
+  statusEl.style.display = 'block';
+  resultsArea.innerHTML = ''; 
+
+  try {
+    // --- STEP A: Process Local Master File ---
+    statusEl.innerText = "Reading your local master file...";
+    const masterText = await readLocalFile(masterInput.files[0]);
+    const masterData = parseCSV(masterText);
+    
+    let actuals = {};
+    masterData.forEach(match => {
+      if(match["Home Goals"] !== "-" && match["Away Goals"] !== "-") {
+        actuals[match["Match ID"]] = { 
+          hg: parseInt(match["Home Goals"]), 
+          ag: parseInt(match["Away Goals"]) 
+        };
+      }
+    });
+
+    // --- STEP B: Find files via GitHub API ---
+    statusEl.innerText = `Scanning GitHub repository (${GITHUB_USERNAME}/${GITHUB_REPO}) for player files...`;
+    
+    // The GitHub API endpoint that lists repository contents
+    const repoUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/`;
+    const apiResponse = await fetch(repoUrl);
+    
+    if (!apiResponse.ok) {
+      throw new Error(`Could not connect to GitHub. Make sure the repository is Public. (Status: ${apiResponse.status})`);
+    }
+    
+    const allFiles = await apiResponse.json();
+    
+    // Filter out everything except .csv files
+    const playerFiles = allFiles.filter(file => file.name.endsWith('.csv') && file.type === 'file');
+
+    if (playerFiles.length === 0) {
+      throw new Error("No .csv files found in the root of the repository.");
+    }
+
+    statusEl.innerText = `Found ${playerFiles.length} players! Downloading predictions...`;
+
+    // --- STEP C: Download all player files ---
+    let leaderboard = [];
+    
+    const playerTexts = await Promise.all(
+      playerFiles.map(async (file) => {
+        const res = await fetch(`${file.download_url}?v=${new Date().getTime()}`);
+        if(!res.ok) throw new Error(`Failed to download ${file.name}`);
+        return { name: file.name, content: await res.text() };
+      })
+    );
+
+    // --- STEP D: Calculate Scores ---
+    for (let i = 0; i < playerTexts.length; i++) {
+      let pData = parseCSV(playerTexts[i].content);
+      
+      let playerName = playerTexts[i].name.replace('.csv', '').replace(/_/g, ' ');
+      playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+
+      let totalPoints = 0, exactScores = 0, correctResults = 0;
+
+      pData.forEach(pMatch => {
+        let mId = pMatch["Match ID"];
+        if(actuals[mId] && pMatch["Home Goals"] !== "-" && pMatch["Away Goals"] !== "-") {
+          let actualHG = actuals[mId].hg;
+          let actualAG = actuals[mId].ag;
+          let playerHG = parseInt(pMatch["Home Goals"]);
+          let playerAG = parseInt(pMatch["Away Goals"]);
+
+          if (playerHG === actualHG && playerAG === actualAG) {
+            totalPoints += 3;
+            exactScores += 1;
+          } else {
+            let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
+            let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
+            if (actualResult === playerResult) {
+              totalPoints += 1;
+              correctResults += 1;
+            }
+          }
+        }
+      });
+      leaderboard.push({ name: playerName, points: totalPoints, exact: exactScores, results: correctResults });
+    }
+
+    // --- STEP E: Sort & Render Leaderboard ---
+    statusEl.innerText = "Generating Leaderboard...";
+    leaderboard.sort((a, b) => b.points - a.points || b.exact - a.exact || b.results - a.results);
+
+    let html = `<table><tr><th>Rank</th><th>Player Name</th><th>Total Points</th><th>Exact Scores (3pts)</th><th>Correct Results (1pt)</th></tr>`;
+    leaderboard.forEach((player, index) => {
+      let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
+      html += `<tr class="${rankClass}">
+                 <td>${index + 1}</td>
+                 <td style="font-weight:bold;">${player.name}</td>
+                 <td style="font-size:1.2em; font-weight:bold;">${player.points}</td>
+                 <td>${player.exact}</td><td>${player.results}</td>
+               </tr>`;
+    });
+    html += `</table>`;
+    
+    statusEl.style.display = 'none';
+    resultsArea.innerHTML = html;
+
+  } catch (error) {
+    statusEl.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+    console.error(error);
+  }
+}
+</script>
+</body>
+</html>
