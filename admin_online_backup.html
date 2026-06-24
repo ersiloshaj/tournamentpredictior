@@ -16,33 +16,12 @@
   button:hover { background: #004494; }
   
   .status { text-align: center; font-style: italic; color: #666; margin-bottom: 20px; font-weight: bold; }
-  
-  /* Table & Ranking Styles */
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
   th { background: #222; color: white; }
   .rank-1 { background: #ffd700; font-weight: bold; } /* Gold */
   .rank-2 { background: #c0c0c0; font-weight: bold; } /* Silver */
   .rank-3 { background: #cd7f32; font-weight: bold; } /* Bronze */
-  
-  /* --- NEW: Interactive Row Styles --- */
-  .clickable-row { cursor: pointer; transition: background-color 0.2s; }
-  .clickable-row:hover { filter: brightness(0.95); }
-  .dropdown-icon { font-size: 0.8em; color: #666; margin-left: 8px; transition: transform 0.2s; display: inline-block; }
-  .clickable-row.expanded .dropdown-icon { transform: rotate(180deg); }
-  
-  .details-row { display: none; background: #fafafa; text-align: left; }
-  .details-row.open { display: table-row; }
-  .details-container { display: flex; gap: 20px; padding: 15px; justify-content: center; }
-  .details-col { flex: 1; background: white; border: 1px solid #eee; padding: 15px; border-radius: 6px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); }
-  .details-col h4 { margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; }
-  .match-item { font-size: 0.9em; margin-bottom: 6px; padding: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ccc; }
-  
-  /* Badges */
-  .badge-exact { background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
-  .badge-result { background: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
-  .exact-col { border-left-color: #28a745; }
-  .result-col { border-left-color: #007bff; }
 </style>
 </head>
 <body>
@@ -87,13 +66,6 @@ function parseCSV(text) {
   return data;
 }
 
-// Security helper to prevent XSS (since we are injecting CSV strings into HTML)
-function sanitizeHTML(str) {
-  let temp = document.createElement('div');
-  temp.textContent = str;
-  return temp.innerHTML;
-}
-
 // 2. Helper to read the LOCAL Master file
 function readLocalFile(file) {
   return new Promise((resolve, reject) => {
@@ -103,20 +75,6 @@ function readLocalFile(file) {
     reader.readAsText(file);
   });
 }
-
-// --- NEW: Toggle function for the UI ---
-window.toggleDetails = function(index) {
-  const detailsRow = document.getElementById(`details-${index}`);
-  const mainRow = document.getElementById(`main-row-${index}`);
-  
-  if (detailsRow.classList.contains('open')) {
-    detailsRow.classList.remove('open');
-    mainRow.classList.remove('expanded');
-  } else {
-    detailsRow.classList.add('open');
-    mainRow.classList.add('expanded');
-  }
-};
 
 // Main function triggered by the button
 async function runLeagueScorer() {
@@ -151,6 +109,7 @@ async function runLeagueScorer() {
     // --- STEP B: Find files via GitHub API ---
     statusEl.innerText = `Scanning GitHub repository (${GITHUB_USERNAME}/${GITHUB_REPO}) for player files...`;
     
+    // The GitHub API endpoint that lists repository contents
     const repoUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/`;
     const apiResponse = await fetch(repoUrl);
     
@@ -159,6 +118,8 @@ async function runLeagueScorer() {
     }
     
     const allFiles = await apiResponse.json();
+    
+    // Filter out everything except .csv files
     const playerFiles = allFiles.filter(file => file.name.endsWith('.csv') && file.type === 'file');
 
     if (playerFiles.length === 0) {
@@ -182,29 +143,22 @@ async function runLeagueScorer() {
     for (let i = 0; i < playerTexts.length; i++) {
       let pData = parseCSV(playerTexts[i].content);
       
-      let playerName = playerTexts[i].name
-        .replace(/\.csv$/i, '') 
-        .replace(/[-_\s]*(world[-_\s]*cup[-_\s]*)?predictions/i, '') 
-        .replace(/_/g, ' ') 
-        .trim(); 
+    // Clean up filename to create a nice player name
+    let playerName = playerTexts[i].name
+      .replace(/\.csv$/i, '') // 1. Remove the .csv extension
+      .replace(/[-_\s]*(world[-_\s]*cup[-_\s]*)?predictions/i, '') // 2. Remove "world cup predictions" or "predictions"
+      .replace(/_/g, ' ') // 3. Replace any leftover underscores with spaces
+      .trim(); // 4. Remove any extra spaces at the beginning or end
 
-      if (playerName.length > 0) {
-        playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
-      }
+    // Capitalize the first letter (e.g., "ersi" -> "Ersi")
+    if (playerName.length > 0) {
+      playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+    }
 
       let totalPoints = 0, exactScores = 0, correctResults = 0;
-      
-      // Arrays to store the specific matches they got right
-      let exactMatchesList = [];
-      let resultMatchesList = [];
 
       pData.forEach(pMatch => {
         let mId = pMatch["Match ID"];
-        
-        // Grab team names for display (fallback to 'Home'/'Away' if columns are missing)
-        let homeTeam = pMatch["Home Team"] || "Home";
-        let awayTeam = pMatch["Away Team"] || "Away";
-
         if(actuals[mId] && pMatch["Home Goals"] !== "-" && pMatch["Away Goals"] !== "-") {
           let actualHG = actuals[mId].hg;
           let actualAG = actuals[mId].ag;
@@ -214,30 +168,17 @@ async function runLeagueScorer() {
           if (playerHG === actualHG && playerAG === actualAG) {
             totalPoints += 3;
             exactScores += 1;
-            // Record exact hit
-            exactMatchesList.push(`${homeTeam} ${playerHG} - ${playerAG} ${awayTeam}`);
           } else {
             let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
             let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
-            
             if (actualResult === playerResult) {
               totalPoints += 1;
               correctResults += 1;
-              // Record result hit with actual score for comparison
-              resultMatchesList.push(`${homeTeam} ${playerHG}-${playerAG} ${awayTeam} (Actual: ${actualHG}-${actualAG})`);
             }
           }
         }
       });
-      
-      leaderboard.push({ 
-        name: playerName, 
-        points: totalPoints, 
-        exact: exactScores, 
-        results: correctResults,
-        exactList: exactMatchesList,
-        resultList: resultMatchesList
-      });
+      leaderboard.push({ name: playerName, points: totalPoints, exact: exactScores, results: correctResults });
     }
 
     // --- STEP E: Sort & Render Leaderboard ---
@@ -245,38 +186,15 @@ async function runLeagueScorer() {
     leaderboard.sort((a, b) => b.points - a.points || b.exact - a.exact || b.results - a.results);
 
     let html = `<table><tr><th>Rank</th><th>Player Name</th><th>Total Points</th><th>Exact Scores (3pts)</th><th>Correct Results (1pt)</th></tr>`;
-    
     leaderboard.forEach((player, index) => {
       let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
-      
-      // 1. The Main Clickable Row
-      html += `<tr id="main-row-${index}" class="${rankClass} clickable-row" onclick="toggleDetails(${index})">
+      html += `<tr class="${rankClass}">
                  <td>${index + 1}</td>
-                 <td style="font-weight:bold;">${sanitizeHTML(player.name)} <span class="dropdown-icon">▼</span></td>
+                 <td style="font-weight:bold;">${player.name}</td>
                  <td style="font-size:1.2em; font-weight:bold;">${player.points}</td>
                  <td>${player.exact}</td><td>${player.results}</td>
                </tr>`;
-               
-      // 2. The Hidden Dropdown Details Row
-      html += `<tr id="details-${index}" class="details-row">
-                 <td colspan="5" style="padding: 0;">
-                   <div class="details-container">
-                     
-                     <div class="details-col">
-                       <h4 style="color: #155724;">🎯 Exact Scores (+3 pts)</h4>
-                       ${player.exactList.map(m => `<div class="match-item exact-col"><span class="badge-exact">+3</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No exact scores yet.</div>'}
-                     </div>
-                     
-                     <div class="details-col">
-                       <h4 style="color: #004085;">✅ Correct Results (+1 pt)</h4>
-                       ${player.resultList.map(m => `<div class="match-item result-col"><span class="badge-result">+1</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No correct results yet.</div>'}
-                     </div>
-                     
-                   </div>
-                 </td>
-               </tr>`;
     });
-    
     html += `</table>`;
     
     statusEl.style.display = 'none';
