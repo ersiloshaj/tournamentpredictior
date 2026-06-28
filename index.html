@@ -236,7 +236,7 @@ function exportCSV() {
 
   let userNameInput = document.getElementById("userName").value.trim();
   let safeUserName = userNameInput.replace(/[^a-zA-Z0-9-]/g, '_');
-  let downloadName = safeUserName ? `${safeUserName}_world_cup_predictions.csv` : "world_cup_predictions.csv";
+  let downloadName = safeUserName ? `${safeUserName}_world_cup_r32.csv` : "world_cup_r32.csv";
 
   let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   let link = document.createElement("a");
