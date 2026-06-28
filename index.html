@@ -2,10 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>2026 World Cup - Knockout Predictor</title>
+<title>2026 World Cup - Round of 32 Predictor</title>
 
 <style>
-  body { font-family: Arial; padding: 20px; background: #f4f4f9; color: #333; margin: 0; }
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; margin: 0; }
 
   .header-controls { 
     display: flex; 
@@ -41,109 +41,68 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    overflow-x: auto; /* Allows scrolling if screen is too small */
   }
 
-  /* --- NEW BRACKET LAYOUT CSS --- */
-  .tournament-bracket {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    min-width: 1400px; /* Prevents boxes from squishing */
-  }
-
-  .bracket-half {
-    display: flex;
-    flex: 1;
-    gap: 15px;
-  }
-
-  .right-half {
-    flex-direction: row-reverse; /* Reverses the flow so it converges leftwards */
-  }
-
-  .bracket-center {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-width: 240px;
-    gap: 30px;
-    background: #fafafa;
-    border: 2px dashed #ccc;
-    border-radius: 10px;
-    padding: 15px;
-  }
-
-  .round {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 180px;
-  }
-
-  .round h3 { 
-    text-align: center; 
-    background: #222; 
-    color: white; 
-    padding: 6px 0; 
-    border-radius: 4px; 
-    margin: 0 0 10px 0; 
-    font-size: 14px; 
-  }
-
-  .match-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around; /* This naturally spaces the brackets out vertically */
-    flex-grow: 1;
+  /* --- NEW GRID LAYOUT CSS --- */
+  .r32-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
   }
 
   .match {
-    border: 1px solid #ccc;
-    padding: 8px;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    font-size: 14px;
-    margin: 5px 0;
+    border: 1px solid #ddd;
+    padding: 12px;
+    background: #fdfdfd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    font-size: 15px;
+  }
+
+  .match-title {
+    text-align: center;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
   }
 
   .team-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
 
   .team-row input { 
-    width: 25px; 
+    width: 30px; 
     text-align: center; 
     border: 1px solid #ccc; 
     border-radius: 4px; 
-    padding: 4px; 
+    padding: 6px; 
     font-weight: bold;
+    font-size: 14px;
   }
 
-  .match.empty {
-    color: #aaa;
-    font-style: italic;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 60px;
-    background: #fdfdfd;
+  .winner { 
+    color: #155724; 
+    background: #d4edda;
+    padding: 4px;
+    border-radius: 4px;
+    font-weight: bold; 
+    margin-top: 10px; 
+    font-size: 0.9em; 
+    text-align: center; 
   }
-
-  .winner { color: green; font-weight: bold; margin-top: 4px; font-size: 0.85em; text-align: center; }
-  .finals-box h2, .finals-box h3 { text-align: center; margin: 0 0 10px 0; color: #222; }
 </style>
 </head>
 
 <body>
 
 <div class="header-controls">
-  <h1>🏆 Knockout Stage Predictor</h1>
+  <h1>🏆 Round of 32 Predictor</h1>
   <div class="export-container">
     <button class="btn-sim" onclick="simulateKnockout()">🎲 Random Simulate</button>
     <input type="text" id="userName" class="name-input" placeholder="Enter your name">
@@ -152,7 +111,7 @@
 </div>
 
 <div class="bracket-container">
-  <div id="bracket"></div>
+  <div id="bracket" class="r32-grid"></div>
 </div>
 
 <script>
@@ -181,62 +140,33 @@ function display(id){
 /* ================= FIXTURES STATE ================= */
 
 let knockout = {
-  R16:[], QF:[], SF:[], F:[], P3:[],
-  
-R32: [
-    // --- LEFT HALF OF BRACKET (Converges to Semi-Final 1) ---
-    // Quarterfinal 1 Path
-    {id: "R32_M1", home: "E1", away: "D2", hg: "", ag: ""}, // Official Match 73
-    {id: "R32_M2", home: "I1", away: "F3", hg: "", ag: ""}, // Official Match 75
-    {id: "R32_M3", home: "A2", away: "B1", hg: "", ag: ""}, // Official Match 74
-    {id: "R32_M4", home: "F1", away: "C2", hg: "", ag: ""}, // Official Match 78
-    // Quarterfinal 2 Path
-    {id: "R32_M5", home: "", away: "", hg: "", ag: ""}, // Official Match 80
-    {id: "R32_M6", home: "", away: "", hg: "", ag: ""}, // Official Match 82
-    {id: "R32_M7", home: "D1", away: "B2", hg: "", ag: ""}, // Official Match 84
-    {id: "R32_M8", home: "", away: "", hg: "", ag: ""}, // Official Match 83
-
-    // --- RIGHT HALF OF BRACKET (Converges to Semi-Final 2) ---
-    // Quarterfinal 3 Path
-    {id: "R32_M9", home: "C1", away: "F2", hg: "", ag: ""}, // Official Match 76
-    {id: "R32_M10", home: "E3", away: "I4", hg: "", ag: ""}, // Official Match 77
-    {id: "R32_M11", home: "A1", away: "E4", hg: "", ag: ""}, // Official Match 79
-    {id: "R32_M12", home: "", away: "", hg: "", ag: ""}, // Official Match 81
-    // Quarterfinal 4 Path
-    {id: "R32_M13", home: "J1", away: "H2", hg: "", ag: ""}, // Official Match 85
-    {id: "R32_M14", home: "D3", away: "G2", hg: "", ag: ""}, // Official Match 87
-    {id: "R32_M15", home: "B4", away: "X", hg: "", ag: ""}, // Official Match 86
-    {id: "R32_M16", home: "", away: "", hg: "", ag: ""}  // Official Match 88
+  R32: [
+    {id: "R32_M1", home: "E1", away: "D2", hg: "", ag: ""}, 
+    {id: "R32_M2", home: "I1", away: "F3", hg: "", ag: ""}, 
+    {id: "R32_M3", home: "A2", away: "B1", hg: "", ag: ""}, 
+    {id: "R32_M4", home: "F1", away: "C2", hg: "", ag: ""}, 
+    {id: "R32_M5", home: "K1", away: "L2", hg: "", ag: ""}, 
+    {id: "R32_M6", home: "H1", away: "J3", hg: "", ag: ""}, 
+    {id: "R32_M7", home: "D1", away: "B2", hg: "", ag: ""}, 
+    {id: "R32_M8", home: "G1", away: "I2", hg: "", ag: ""}, 
+    {id: "R32_M9", home: "C1", away: "F2", hg: "", ag: ""}, 
+    {id: "R32_M10", home: "E3", away: "I4", hg: "", ag: ""}, 
+    {id: "R32_M11", home: "A1", away: "E4", hg: "", ag: ""}, 
+    {id: "R32_M12", home: "L1", away: "K2", hg: "", ag: ""}, 
+    {id: "R32_M13", home: "J1", away: "H2", hg: "", ag: ""}, 
+    {id: "R32_M14", home: "D3", away: "G2", hg: "", ag: ""}, 
+    {id: "R32_M15", home: "B4", away: "J2", hg: "", ag: ""}, 
+    {id: "R32_M16", home: "K4", away: "L3", hg: "", ag: ""} 
   ]
 };
 
 /* ================= SCORE UPDATE ================= */
 
 function setScore(id, type, val){
-  let m;
-  for(let r in knockout){
-    m = knockout[r].find(x => x.id === id);
-    if(m) break;
-  }
+  let m = knockout.R32.find(x => x.id === id);
   if(!m) return;
   m[type] = val === "" ? "" : Number(val);
-  update();
-}
-
-/* ================= BRACKET PROGRESSION ================= */
-
-function pair(arr, prefix){
-  let out = [];
-  for(let i=0; i<arr.length; i+=2){
-    out.push({
-      id: `${prefix}_M${(i/2)+1}`,
-      home: arr[i],
-      away: arr[i+1],
-      hg: "",
-      ag: ""
-    });
-  }
-  return out;
+  renderKnockout();
 }
 
 function winner(m){
@@ -245,103 +175,18 @@ function winner(m){
   return m.hg > m.ag ? m.home : m.away;
 }
 
-function updateBracketRound(winners, targetRound, prefix) {
-  let requiredWinners = 0;
-  if(prefix === "R16") requiredWinners = 16;
-  if(prefix === "QF") requiredWinners = 8;
-  if(prefix === "SF") requiredWinners = 4;
-  if(prefix === "F") requiredWinners = 2;
-
-  if(winners.length === requiredWinners) {
-    let newPairs = pair(winners, prefix);
-    if(targetRound.length === 0) {
-      return newPairs;
-    } else {
-      for(let i=0; i<targetRound.length; i++) {
-        if(targetRound[i].home !== newPairs[i].home || targetRound[i].away !== newPairs[i].away) {
-          targetRound[i].home = newPairs[i].home;
-          targetRound[i].away = newPairs[i].away;
-          targetRound[i].hg = "";
-          targetRound[i].ag = "";
-        }
-      }
-      return targetRound;
-    }
-  }
-  return [];
-}
-
-function progress(){
-  function W(list){ return (list||[]).map(winner).filter(Boolean); }
-
-  let r32 = W(knockout.R32);
-  knockout.R16 = updateBracketRound(r32, knockout.R16, "R16");
-
-  let r16 = W(knockout.R16);
-  knockout.QF = updateBracketRound(r16, knockout.QF, "QF");
-
-  let qf = W(knockout.QF);
-  knockout.SF = updateBracketRound(qf, knockout.SF, "SF");
-
-  let sf = W(knockout.SF);
-  knockout.F = updateBracketRound(sf, knockout.F, "F");
-
-  if(sf.length === 2) {
-    let losers = knockout.SF.map(m => {
-      if(m.hg === "" || m.ag === "" || m.hg === m.ag) return null;
-      return m.hg > m.ag ? m.away : m.home;
-    }).filter(Boolean);
-
-    if(losers.length === 2) {
-      let newP3 = pair(losers, "P3");
-      if(knockout.P3.length === 0) {
-        knockout.P3 = newP3;
-      } else {
-        if(knockout.P3[0].home !== newP3[0].home || knockout.P3[0].away !== newP3[0].away) {
-          knockout.P3[0].home = newP3[0].home;
-          knockout.P3[0].away = newP3[0].away;
-          knockout.P3[0].hg = "";
-          knockout.P3[0].ag = "";
-        }
-      }
-    } else {
-      knockout.P3 = [];
-    }
-  } else {
-    knockout.P3 = [];
-  }
-}
-
-/* ================= NEW RENDER LOGIC ================= */
-
-function update(){
-  progress();
-  renderKnockout();
-}
+/* ================= RENDER LOGIC ================= */
 
 function renderKnockout(){
   let div = document.getElementById("bracket");
   div.innerHTML = "";
 
-  // Container Setup
-  let bracketWrap = document.createElement("div");
-  bracketWrap.className = "tournament-bracket";
-
-  let leftHalf = document.createElement("div");
-  leftHalf.className = "bracket-half left-half";
-
-  let rightHalf = document.createElement("div");
-  rightHalf.className = "bracket-half right-half";
-
-  let centerStage = document.createElement("div");
-  centerStage.className = "bracket-center";
-
-  // Helpers
-  function createMatchCard(m) {
-    if(!m || !m.home || !m.away) return `<div class="match empty">TBD</div>`;
+  knockout.R32.forEach((m, index) => {
     let w = winner(m);
-    return `
+    
+    div.innerHTML += `
       <div class="match">
+        <div class="match-title">Match ${index + 1}</div>
         <div class="team-row">
           <span>${display(m.home)}</span>
           <input type="text" value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)">
@@ -353,80 +198,28 @@ function renderKnockout(){
         <div class="winner">${w ? "Advances: " + display(w) : "&nbsp;"}</div>
       </div>
     `;
-  }
-
-  function buildRoundCol(name, list, expectedCount) {
-    let col = document.createElement("div");
-    col.className = "round";
-    col.innerHTML = `<h3>${name}</h3>`;
-
-    let matchContainer = document.createElement("div");
-    matchContainer.className = "match-container";
-
-    // Fill with empty placeholders if the previous round isn't finished
-    let matchesToRender = [];
-    for(let i = 0; i < expectedCount; i++) {
-      matchesToRender.push(list[i] || null);
-    }
-
-    matchesToRender.forEach(m => matchContainer.innerHTML += createMatchCard(m));
-    col.appendChild(matchContainer);
-    return col;
-  }
-
-  // Populate Left Side
-  leftHalf.appendChild(buildRoundCol("Round of 32", knockout.R32.slice(0, 8), 8));
-  leftHalf.appendChild(buildRoundCol("Round of 16", knockout.R16.slice(0, 4), 4));
-  leftHalf.appendChild(buildRoundCol("Quarter Final", knockout.QF.slice(0, 2), 2));
-  leftHalf.appendChild(buildRoundCol("Semi Final", knockout.SF.slice(0, 1), 1));
-
-  // Populate Right Side (Because of flex-direction: row-reverse, appending R32 puts it on the far right)
-  rightHalf.appendChild(buildRoundCol("Round of 32", knockout.R32.slice(8, 16), 8));
-  rightHalf.appendChild(buildRoundCol("Round of 16", knockout.R16.slice(4, 8), 4));
-  rightHalf.appendChild(buildRoundCol("Quarter Final", knockout.QF.slice(2, 4), 2));
-  rightHalf.appendChild(buildRoundCol("Semi Final", knockout.SF.slice(1, 2), 1));
-
-  // Populate Center Stage
-  let finalBox = document.createElement("div");
-  finalBox.className = "finals-box";
-  finalBox.innerHTML = `<h2>🏆 Final 🏆</h2>`;
-  finalBox.innerHTML += (knockout.F && knockout.F.length > 0) ? createMatchCard(knockout.F[0]) : `<div class="match empty">TBD vs TBD</div>`;
-  centerStage.appendChild(finalBox);
-
-  let p3Box = document.createElement("div");
-  p3Box.className = "finals-box";
-  p3Box.innerHTML = `<h3>🥉 3rd Place</h3>`;
-  p3Box.innerHTML += (knockout.P3 && knockout.P3.length > 0) ? createMatchCard(knockout.P3[0]) : `<div class="match empty">TBD vs TBD</div>`;
-  centerStage.appendChild(p3Box);
-
-  // Mount to DOM
-  bracketWrap.appendChild(leftHalf);
-  bracketWrap.appendChild(centerStage);
-  bracketWrap.appendChild(rightHalf);
-  div.appendChild(bracketWrap);
+  });
 }
 
 /* ================= SIMULATE & EXPORT ================= */
 
 function simulateKnockout(){
-  for(let r in knockout){
-    (knockout[r] || []).forEach(m => {
-      if(m.home && m.away) {
-        if(m.hg === "") m.hg = Math.floor(Math.random() * 4);
-        if(m.ag === "") m.ag = Math.floor(Math.random() * 4);
-        if(m.hg === m.ag) {
-          Math.random() > 0.5 ? m.hg++ : m.ag++;
-        }
+  knockout.R32.forEach(m => {
+    if(m.home && m.away) {
+      if(m.hg === "") m.hg = Math.floor(Math.random() * 4);
+      if(m.ag === "") m.ag = Math.floor(Math.random() * 4);
+      if(m.hg === m.ag) {
+        Math.random() > 0.5 ? m.hg++ : m.ag++;
       }
-    });
-  }
-  update();
+    }
+  });
+  renderKnockout();
 }
 
 function exportCSV() {
   let csvContent = "Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name\n";
 
-  function addMatchToCSV(stage, m) {
+  knockout.R32.forEach(m => {
     if(!m || !m.home || !m.away) return;
     let matchId = m.id, hId = m.home, aId = m.away;
     let hName = teamData[m.home] ? teamData[m.home].name : m.home;
@@ -438,15 +231,8 @@ function exportCSV() {
     else if (hGoals === "-" && aGoals === "-") { wId = "Not Played"; wName = "Not Played"; } 
     else if (hGoals === aGoals && hGoals !== "-") { wId = "Draw"; wName = "Draw"; }
 
-    csvContent += `"${matchId}","${stage}","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
-  }
-
-  if(knockout.R32) knockout.R32.forEach(m => addMatchToCSV("Round of 32", m));
-  if(knockout.R16) knockout.R16.forEach(m => addMatchToCSV("Round of 16", m));
-  if(knockout.QF) knockout.QF.forEach(m => addMatchToCSV("Quarter Finals", m));
-  if(knockout.SF) knockout.SF.forEach(m => addMatchToCSV("Semi Finals", m));
-  if(knockout.P3 && knockout.P3.length > 0) addMatchToCSV("3rd Place", knockout.P3[0]);
-  if(knockout.F && knockout.F.length > 0) addMatchToCSV("Final", knockout.F[0]);
+    csvContent += `"${matchId}","Round of 32","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
+  });
 
   let userNameInput = document.getElementById("userName").value.trim();
   let safeUserName = userNameInput.replace(/[^a-zA-Z0-9-]/g, '_');
@@ -462,7 +248,7 @@ function exportCSV() {
 }
 
 /* ================= INIT ================= */
-update();
+renderKnockout();
 
 </script>
 </body>
