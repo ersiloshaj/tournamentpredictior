@@ -68,7 +68,7 @@
 // ==========================================
 const GITHUB_USERNAME = "ersiloshaj"; 
 const GITHUB_REPO = "tournamentpredictior"; 
-const TARGET_FOLDERS = ["groups", "r32", "r16", "r8", "r4", "finals"];
+const TARGET_FOLDERS = ["groups", "R32", "R16", "R8", "R4", "finals"];
 
 
 // 1. Helper to parse CSV text
@@ -189,7 +189,7 @@ async function runLeagueScorer() {
       // Advanced text cleaning: Strips .csv, stage names, and "predictions" keywords
       let playerName = playerTexts[i].name
         .replace(/\.csv$/i, '') 
-        .replace(/[-_\s]*(world[-_\s]*cup|predictions|groups|r32|r16|r8|r4|finals)/ig, '') 
+        .replace(/[-_\s]*(world[-_\s]*cup|predictions|groups|R32|R16|R8|R4|finals)/ig, '') 
         .replace(/_/g, ' ') 
         .trim(); 
 
