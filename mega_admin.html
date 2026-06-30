@@ -38,6 +38,9 @@
   .details-col h4 { margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; }
   .match-item { font-size: 0.9em; margin-bottom: 6px; padding: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ccc; }
   
+  /* Sub-headers for grouped stages */
+  .stage-header { margin: 15px 0 8px; color: #444; font-size: 0.85em; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+  
   /* Badges */
   .badge-exact { background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
   .badge-result { background: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
@@ -70,6 +73,15 @@ const GITHUB_USERNAME = "ersiloshaj";
 const GITHUB_REPO = "tournamentpredictior"; 
 const TARGET_FOLDERS = ["groups", "R32", "R16", "R8", "R4", "finals"];
 
+// User-friendly names for the folders
+const STAGE_NAMES = {
+  "groups": "Group Stage",
+  "R32": "Round of 32",
+  "R16": "Round of 16",
+  "R8": "Quarter-Finals",
+  "R4": "Semi-Finals",
+  "finals": "Finals"
+};
 
 // 1. Helper to parse CSV text
 function parseCSV(text) {
@@ -152,10 +164,11 @@ async function runLeagueScorer() {
     // --- STEP B: Scan specific folders via GitHub API ---
     statusEl.innerText = `Scanning GitHub folders (${TARGET_FOLDERS.join(", ")}) for player files...`;
     
-    // Fetch all folders simultaneously 
+    // Fetch all folders simultaneously, tagging each file with the folder it came from
     const folderPromises = TARGET_FOLDERS.map(folder => 
       fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${folder}`)
-        .then(res => res.ok ? res.json() : []) // If a folder doesn't exist yet, just return empty array
+        .then(res => res.ok ? res.json() : [])
+        .then(files => files.map(f => ({ ...f, originFolder: folder }))) // <--- Injecting the folder name
         .catch(() => [])
     );
 
@@ -176,17 +189,17 @@ async function runLeagueScorer() {
       playerFiles.map(async (file) => {
         const res = await fetch(`${file.download_url}?v=${new Date().getTime()}`);
         if(!res.ok) throw new Error(`Failed to download ${file.name}`);
-        return { name: file.name, content: await res.text() };
+        return { name: file.name, originFolder: file.originFolder, content: await res.text() };
       })
     );
 
     // --- STEP D: Parse and Group Scores by Player Name ---
-    let playersData = {}; // Object to hold merged player profiles
+    let playersData = {};
 
     for (let i = 0; i < playerTexts.length; i++) {
       let pData = parseCSV(playerTexts[i].content);
+      let currentFolder = playerTexts[i].originFolder;
       
-      // Advanced text cleaning: Strips .csv, stage names, and "predictions" keywords
       let playerName = playerTexts[i].name
         .replace(/\.csv$/i, '') 
         .replace(/[-_\s]*(world[-_\s]*cup|predictions|groups|R32|R16|R8|R4|finals)/ig, '') 
@@ -199,31 +212,33 @@ async function runLeagueScorer() {
         playerName = "Unknown Player";
       }
 
-      // Initialize the player in our master tracker if they don't exist yet
       if (!playersData[playerName]) {
         playersData[playerName] = {
           name: playerName,
           points: 0,
           exact: 0,
           results: 0,
-          exactList: [],
-          resultList: [],
-          scoredMatches: new Set() // Tracks Match IDs so we never score the same match twice
+          exactList: {},   // Changed to object to hold arrays per folder
+          resultList: {},  // Changed to object to hold arrays per folder
+          scoredMatches: new Set()
         };
+        // Initialize an empty array for every folder to keep them in the correct chronological order later
+        TARGET_FOLDERS.forEach(folder => {
+          playersData[playerName].exactList[folder] = [];
+          playersData[playerName].resultList[folder] = [];
+        });
       }
 
-      // Calculate scores for this specific file
       pData.forEach(pMatch => {
         let mId = pMatch["Match ID"];
         
-        // Ensure this exact match ID hasn't already been scored for this player
         if (mId && !playersData[playerName].scoredMatches.has(mId)) {
           
           let homeTeam = pMatch["Home Team"] || "Home";
           let awayTeam = pMatch["Away Team"] || "Away";
 
           if(actuals[mId] && pMatch["Home Goals"] !== "-" && pMatch["Away Goals"] !== "-") {
-            playersData[playerName].scoredMatches.add(mId); // Mark as scored
+            playersData[playerName].scoredMatches.add(mId); 
             
             let actualHG = actuals[mId].hg;
             let actualAG = actuals[mId].ag;
@@ -233,7 +248,8 @@ async function runLeagueScorer() {
             if (playerHG === actualHG && playerAG === actualAG) {
               playersData[playerName].points += 3;
               playersData[playerName].exact += 1;
-              playersData[playerName].exactList.push(`${homeTeam} ${playerHG} - ${playerAG} ${awayTeam}`);
+              // Push to the specific folder's array
+              playersData[playerName].exactList[currentFolder].push(`${homeTeam} ${playerHG} - ${playerAG} ${awayTeam}`);
             } else {
               let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
               let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
@@ -241,7 +257,8 @@ async function runLeagueScorer() {
               if (actualResult === playerResult) {
                 playersData[playerName].points += 1;
                 playersData[playerName].results += 1;
-                playersData[playerName].resultList.push(`${homeTeam} ${playerHG}-${playerAG} ${awayTeam} (Actual: ${actualHG}-${actualAG})`);
+                // Push to the specific folder's array
+                playersData[playerName].resultList[currentFolder].push(`${homeTeam} ${playerHG}-${playerAG} ${awayTeam} (Actual: ${actualHG}-${actualAG})`);
               }
             }
           }
@@ -249,7 +266,6 @@ async function runLeagueScorer() {
       });
     }
 
-    // Convert grouped object back into an array for sorting
     let leaderboard = Object.values(playersData);
 
     // --- STEP E: Sort & Render Leaderboard ---
@@ -261,6 +277,30 @@ async function runLeagueScorer() {
     leaderboard.forEach((player, index) => {
       let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
       
+      // Build grouped HTML blocks for exact and result lists
+      let exactHtml = "";
+      let resultHtml = "";
+      
+      TARGET_FOLDERS.forEach(folder => {
+        let exactsInFolder = player.exactList[folder];
+        let resultsInFolder = player.resultList[folder];
+        let displayStageName = STAGE_NAMES[folder] || folder;
+
+        if (exactsInFolder && exactsInFolder.length > 0) {
+          exactHtml += `<div class="stage-header">📁 ${displayStageName}</div>`;
+          exactHtml += exactsInFolder.map(m => `<div class="match-item exact-col"><span class="badge-exact">+3</span> ${sanitizeHTML(m)}</div>`).join('');
+        }
+        
+        if (resultsInFolder && resultsInFolder.length > 0) {
+          resultHtml += `<div class="stage-header">📁 ${displayStageName}</div>`;
+          resultHtml += resultsInFolder.map(m => `<div class="match-item result-col"><span class="badge-result">+1</span> ${sanitizeHTML(m)}</div>`).join('');
+        }
+      });
+      
+      // Fallbacks if arrays are completely empty
+      if (exactHtml === "") exactHtml = `<div class="match-item" style="color:#888; border:none; margin-top:10px;">No exact scores yet.</div>`;
+      if (resultHtml === "") resultHtml = `<div class="match-item" style="color:#888; border:none; margin-top:10px;">No correct results yet.</div>`;
+
       // Main Clickable Row
       html += `<tr id="main-row-${index}" class="${rankClass} clickable-row" onclick="toggleDetails(${index})">
                  <td>${index + 1}</td>
@@ -276,12 +316,12 @@ async function runLeagueScorer() {
                      
                      <div class="details-col">
                        <h4 style="color: #155724;">🎯 Exact Scores (+3 pts)</h4>
-                       ${player.exactList.map(m => `<div class="match-item exact-col"><span class="badge-exact">+3</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No exact scores yet.</div>'}
+                       ${exactHtml}
                      </div>
                      
                      <div class="details-col">
                        <h4 style="color: #004085;">✅ Correct Results (+1 pt)</h4>
-                       ${player.resultList.map(m => `<div class="match-item result-col"><span class="badge-result">+1</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No correct results yet.</div>'}
+                       ${resultHtml}
                      </div>
                      
                    </div>
