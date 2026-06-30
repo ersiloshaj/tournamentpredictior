@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Prediction League</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+  .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #222; }
+  
+  .admin-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 2px solid #ccc; }
+  .admin-panel h3 { margin-top: 0; color: #0056b3; }
+  label { font-weight: bold; display: block; margin-bottom: 5px; }
+  input[type="file"] { display: block; margin-bottom: 15px; }
+  button { background: #0056b3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+  button:hover { background: #004494; }
+  
+  .status { text-align: center; font-style: italic; color: #666; margin-bottom: 20px; font-weight: bold; }
+  
+  /* Table & Ranking Styles */
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+  th { background: #222; color: white; }
+  .rank-1 { background: #ffd700; font-weight: bold; } /* Gold */
+  .rank-2 { background: #c0c0c0; font-weight: bold; } /* Silver */
+  .rank-3 { background: #cd7f32; font-weight: bold; } /* Bronze */
+  
+  /* Interactive Row Styles */
+  .clickable-row { cursor: pointer; transition: background-color 0.2s; }
+  .clickable-row:hover { filter: brightness(0.95); }
+  .dropdown-icon { font-size: 0.8em; color: #666; margin-left: 8px; transition: transform 0.2s; display: inline-block; }
+  .clickable-row.expanded .dropdown-icon { transform: rotate(180deg); }
+  
+  .details-row { display: none; background: #fafafa; text-align: left; }
+  .details-row.open { display: table-row; }
+  .details-container { display: flex; gap: 20px; padding: 15px; justify-content: center; }
+  .details-col { flex: 1; background: white; border: 1px solid #eee; padding: 15px; border-radius: 6px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); }
+  .details-col h4 { margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; }
+  .match-item { font-size: 0.9em; margin-bottom: 6px; padding: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ccc; }
+  
+  /* Badges */
+  .badge-exact { background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
+  .badge-result { background: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
+  .exact-col { border-left-color: #28a745; }
+  .result-col { border-left-color: #007bff; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🏆 Prediction League Leaderboard 🏆</h1>
+  
+  <div class="admin-panel">
+    <h3>Admin Control</h3>
+    <label for="masterFile">1. Upload your local MASTER Results CSV:</label>
+    <input type="file" id="masterFile" accept=".csv">
+    
+    <button onclick="runLeagueScorer()">📊 Calculate Scores</button>
+  </div>
+
+  <div id="statusMessage" class="status" style="display:none;"></div>
+  <div id="resultsArea"></div>
+</div>
+
+<script>
+// ==========================================
+// ⚙️ GITHUB CONFIGURATION ⚙️
+// ==========================================
+const GITHUB_USERNAME = "ersiloshaj"; 
+const GITHUB_REPO = "tournamentpredictior"; 
+const TARGET_FOLDERS = ["groups", "r32", "r16", "r8", "r4", "finals"];
+
+
+// 1. Helper to parse CSV text
+function parseCSV(text) {
+  let lines = text.trim().split("\n");
+  let headers = lines[0].split(",").map(h => h.replace(/"/g, '').trim());
+  let data = [];
+  for(let i=1; i<lines.length; i++){
+    let row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(",");
+    let obj = {};
+    headers.forEach((h, index) => {
+      let val = row[index] ? row[index].replace(/"/g, '').trim() : "";
+      obj[h] = val;
+    });
+    data.push(obj);
+  }
+  return data;
+}
+
+// Security helper to prevent XSS
+function sanitizeHTML(str) {
+  let temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML;
+}
+
+// 2. Helper to read the LOCAL Master file
+function readLocalFile(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = e => reject(e);
+    reader.readAsText(file);
+  });
+}
+
+// Toggle function for the UI
+window.toggleDetails = function(index) {
+  const detailsRow = document.getElementById(`details-${index}`);
+  const mainRow = document.getElementById(`main-row-${index}`);
+  
+  if (detailsRow.classList.contains('open')) {
+    detailsRow.classList.remove('open');
+    mainRow.classList.remove('expanded');
+  } else {
+    detailsRow.classList.add('open');
+    mainRow.classList.add('expanded');
+  }
+};
+
+// Main function triggered by the button
+async function runLeagueScorer() {
+  const masterInput = document.getElementById('masterFile');
+  const statusEl = document.getElementById('statusMessage');
+  const resultsArea = document.getElementById('resultsArea');
+
+  if (masterInput.files.length === 0) {
+    alert("Please upload the Master Results CSV first!");
+    return;
+  }
+
+  statusEl.style.display = 'block';
+  resultsArea.innerHTML = ''; 
+
+  try {
+    // --- STEP A: Process Local Master File ---
+    statusEl.innerText = "Reading your local master file...";
+    const masterText = await readLocalFile(masterInput.files[0]);
+    const masterData = parseCSV(masterText);
+    
+    let actuals = {};
+    masterData.forEach(match => {
+      if(match["Home Goals"] !== "-" && match["Away Goals"] !== "-") {
+        actuals[match["Match ID"]] = { 
+          hg: parseInt(match["Home Goals"]), 
+          ag: parseInt(match["Away Goals"]) 
+        };
+      }
+    });
+
+    // --- STEP B: Scan specific folders via GitHub API ---
+    statusEl.innerText = `Scanning GitHub folders (${TARGET_FOLDERS.join(", ")}) for player files...`;
+    
+    // Fetch all folders simultaneously 
+    const folderPromises = TARGET_FOLDERS.map(folder => 
+      fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${folder}`)
+        .then(res => res.ok ? res.json() : []) // If a folder doesn't exist yet, just return empty array
+        .catch(() => [])
+    );
+
+    const folderResults = await Promise.all(folderPromises);
+    
+    // Flatten arrays and filter for CSVs
+    const allFiles = folderResults.flat();
+    const playerFiles = allFiles.filter(file => file.name && file.name.endsWith('.csv') && file.type === 'file');
+
+    if (playerFiles.length === 0) {
+      throw new Error(`No .csv files found in any of these folders: ${TARGET_FOLDERS.join(", ")}.`);
+    }
+
+    statusEl.innerText = `Found ${playerFiles.length} files across folders! Downloading predictions...`;
+
+    // --- STEP C: Download all player files ---
+    const playerTexts = await Promise.all(
+      playerFiles.map(async (file) => {
+        const res = await fetch(`${file.download_url}?v=${new Date().getTime()}`);
+        if(!res.ok) throw new Error(`Failed to download ${file.name}`);
+        return { name: file.name, content: await res.text() };
+      })
+    );
+
+    // --- STEP D: Parse and Group Scores by Player Name ---
+    let playersData = {}; // Object to hold merged player profiles
+
+    for (let i = 0; i < playerTexts.length; i++) {
+      let pData = parseCSV(playerTexts[i].content);
+      
+      // Advanced text cleaning: Strips .csv, stage names, and "predictions" keywords
+      let playerName = playerTexts[i].name
+        .replace(/\.csv$/i, '') 
+        .replace(/[-_\s]*(world[-_\s]*cup|predictions|groups|r32|r16|r8|r4|finals)/ig, '') 
+        .replace(/_/g, ' ') 
+        .trim(); 
+
+      if (playerName.length > 0) {
+        playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+      } else {
+        playerName = "Unknown Player";
+      }
+
+      // Initialize the player in our master tracker if they don't exist yet
+      if (!playersData[playerName]) {
+        playersData[playerName] = {
+          name: playerName,
+          points: 0,
+          exact: 0,
+          results: 0,
+          exactList: [],
+          resultList: [],
+          scoredMatches: new Set() // Tracks Match IDs so we never score the same match twice
+        };
+      }
+
+      // Calculate scores for this specific file
+      pData.forEach(pMatch => {
+        let mId = pMatch["Match ID"];
+        
+        // Ensure this exact match ID hasn't already been scored for this player
+        if (mId && !playersData[playerName].scoredMatches.has(mId)) {
+          
+          let homeTeam = pMatch["Home Team"] || "Home";
+          let awayTeam = pMatch["Away Team"] || "Away";
+
+          if(actuals[mId] && pMatch["Home Goals"] !== "-" && pMatch["Away Goals"] !== "-") {
+            playersData[playerName].scoredMatches.add(mId); // Mark as scored
+            
+            let actualHG = actuals[mId].hg;
+            let actualAG = actuals[mId].ag;
+            let playerHG = parseInt(pMatch["Home Goals"]);
+            let playerAG = parseInt(pMatch["Away Goals"]);
+
+            if (playerHG === actualHG && playerAG === actualAG) {
+              playersData[playerName].points += 3;
+              playersData[playerName].exact += 1;
+              playersData[playerName].exactList.push(`${homeTeam} ${playerHG} - ${playerAG} ${awayTeam}`);
+            } else {
+              let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
+              let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
+              
+              if (actualResult === playerResult) {
+                playersData[playerName].points += 1;
+                playersData[playerName].results += 1;
+                playersData[playerName].resultList.push(`${homeTeam} ${playerHG}-${playerAG} ${awayTeam} (Actual: ${actualHG}-${actualAG})`);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Convert grouped object back into an array for sorting
+    let leaderboard = Object.values(playersData);
+
+    // --- STEP E: Sort & Render Leaderboard ---
+    statusEl.innerText = "Generating Leaderboard...";
+    leaderboard.sort((a, b) => b.points - a.points || b.exact - a.exact || b.results - a.results);
+
+    let html = `<table><tr><th>Rank</th><th>Player Name</th><th>Total Points</th><th>Exact Scores (3pts)</th><th>Correct Results (1pt)</th></tr>`;
+    
+    leaderboard.forEach((player, index) => {
+      let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
+      
+      // Main Clickable Row
+      html += `<tr id="main-row-${index}" class="${rankClass} clickable-row" onclick="toggleDetails(${index})">
+                 <td>${index + 1}</td>
+                 <td style="font-weight:bold;">${sanitizeHTML(player.name)} <span class="dropdown-icon">▼</span></td>
+                 <td style="font-size:1.2em; font-weight:bold;">${player.points}</td>
+                 <td>${player.exact}</td><td>${player.results}</td>
+               </tr>`;
+               
+      // Hidden Dropdown Details Row
+      html += `<tr id="details-${index}" class="details-row">
+                 <td colspan="5" style="padding: 0;">
+                   <div class="details-container">
+                     
+                     <div class="details-col">
+                       <h4 style="color: #155724;">🎯 Exact Scores (+3 pts)</h4>
+                       ${player.exactList.map(m => `<div class="match-item exact-col"><span class="badge-exact">+3</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No exact scores yet.</div>'}
+                     </div>
+                     
+                     <div class="details-col">
+                       <h4 style="color: #004085;">✅ Correct Results (+1 pt)</h4>
+                       ${player.resultList.map(m => `<div class="match-item result-col"><span class="badge-result">+1</span> ${sanitizeHTML(m)}</div>`).join('') || '<div class="match-item" style="color:#888; border:none;">No correct results yet.</div>'}
+                     </div>
+                     
+                   </div>
+                 </td>
+               </tr>`;
+    });
+    
+    html += `</table>`;
+    
+    statusEl.style.display = 'none';
+    resultsArea.innerHTML = html;
+
+  } catch (error) {
+    statusEl.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+    console.error(error);
+  }
+}
+</script>
+</body>
+</html>
