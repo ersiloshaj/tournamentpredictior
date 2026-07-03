@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>2026 World Cup - Round of 32 Predictor</title>
+<title>2026 World Cup - Round of 16 Predictor</title>
 
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; margin: 0; }
@@ -43,10 +43,10 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 
-  /* --- NEW GRID LAYOUT CSS --- */
-  .r32-grid {
+  /* --- GRID LAYOUT CSS --- */
+  .bracket-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
   }
 
@@ -62,11 +62,38 @@
   .match-title {
     text-align: center;
     font-weight: bold;
-    color: #555;
-    margin-bottom: 10px;
+    color: #fff;
+    background: #222;
+    margin: -12px -12px 10px -12px;
+    padding: 8px;
+    border-radius: 8px 8px 0 0;
     font-size: 0.9em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+  }
+  
+  .match-subtitle {
+    display: block;
+    font-weight: normal;
+    font-size: 0.85em;
+    color: #ccc;
+    margin-top: 3px;
+  }
+
+  .scenario-label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #0056b3;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-align: center;
+    background: #e9ecef;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
+  .scenario-divider {
+    border: 0;
+    border-top: 2px dashed #ccc;
+    margin: 15px 0;
   }
 
   .team-row {
@@ -102,7 +129,7 @@
 <body>
 
 <div class="header-controls">
-  <h1>🏆 Round of 32 Predictor</h1>
+  <h1>CSGUL Round of 16 Predictor</h1>
   <div class="export-container">
     <button class="btn-sim" onclick="simulateKnockout()">🎲 Random Simulate</button>
     <input type="text" id="userName" class="name-input" placeholder="Enter your name">
@@ -111,7 +138,7 @@
 </div>
 
 <div class="bracket-container">
-  <div id="bracket" class="r32-grid"></div>
+  <div id="bracket" class="bracket-grid"></div>
 </div>
 
 <script>
@@ -140,30 +167,81 @@ function display(id){
 /* ================= FIXTURES STATE ================= */
 
 let knockout = {
-  R32: [
-    {id: "R32_M1", home: "E1", away: "D2", hg: "", ag: ""}, 
-    {id: "R32_M2", home: "I1", away: "F3", hg: "", ag: ""}, 
-    {id: "R32_M3", home: "A2", away: "B1", hg: "", ag: ""}, 
-    {id: "R32_M4", home: "F1", away: "C2", hg: "", ag: ""}, 
-    {id: "R32_M5", home: "K1", away: "L2", hg: "", ag: ""}, 
-    {id: "R32_M6", home: "H1", away: "J3", hg: "", ag: ""}, 
-    {id: "R32_M7", home: "D1", away: "B2", hg: "", ag: ""}, 
-    {id: "R32_M8", home: "G1", away: "I2", hg: "", ag: ""}, 
-    {id: "R32_M9", home: "C1", away: "F2", hg: "", ag: ""}, 
-    {id: "R32_M10", home: "E3", away: "I4", hg: "", ag: ""}, 
-    {id: "R32_M11", home: "A1", away: "E4", hg: "", ag: ""}, 
-    {id: "R32_M12", home: "L1", away: "K2", hg: "", ag: ""}, 
-    {id: "R32_M13", home: "J1", away: "H2", hg: "", ag: ""}, 
-    {id: "R32_M14", home: "D3", away: "G2", hg: "", ag: ""}, 
-    {id: "R32_M15", home: "B4", away: "J2", hg: "", ag: ""}, 
-    {id: "R32_M16", home: "K4", away: "L3", hg: "", ag: ""} 
+  R16: [
+    // --- CONFIRMED FIXTURES ---
+    {
+      title: "Canada vs Morocco",
+      subtitle: "Jul 4 - 6:00 PM",
+      options: [
+        {id: "R16_M1", home: "B1", away: "C2", hg: "", ag: ""} 
+      ]
+    },
+    {
+      title: "Paraguay vs France",
+      subtitle: "Jul 4 10:00 PM",
+      options: [
+        {id: "R16_M2", home: "D2", away: "I1", hg: "", ag: ""} 
+      ]
+    },
+    {
+      title: "Brazil vs Norway",
+      subtitle: "Sun, Jul 5 - 9:00 PM",
+      options: [
+        {id: "R16_M3", home: "C1", away: "I4", hg: "", ag: ""} 
+      ]
+    },
+    {
+      title: "Mexico vs England",
+      subtitle: "Mon, Jul 6 - 1:00 AM",
+      options: [
+        {id: "R16_M4", home: "A1", away: "L1", hg: "", ag: ""} 
+      ]
+    },
+    {
+      title: "Portugal vs Spain",
+      subtitle: "Mon, Jul 6 - 8:00 PM",
+      options: [
+        {id: "R16_M5", home: "K1", away: "H1", hg: "", ag: ""} 
+      ]
+    },
+    {
+      title: "USA vs Belgium",
+      subtitle: "Tue, Jul 7 - 1:00 AM",
+      options: [
+        {id: "R16_M6", home: "D1", away: "G1", hg: "", ag: ""} 
+      ]
+    },
+
+    // --- UNCONFIRMED FIXTURES ---
+    {
+      title: "Argentina/Cabo Verde vs Australia/Egypt",
+      subtitle: "Tue, Jul 7 - 5:00 PM",
+      options: [
+        {id: "R16_M7_A", home: "J1", away: "D3", hg: "", ag: "", label: "Scenario A: Argentina vs Australia"},
+        {id: "R16_M7_B", home: "J1", away: "G2", hg: "", ag: "", label: "Scenario B: Argentina vs Egypt"},
+        {id: "R16_M7_C", home: "H2", away: "D3", hg: "", ag: "", label: "Scenario C: Cape Verde vs Australia"},
+        {id: "R16_M7_D", home: "H2", away: "G2", hg: "", ag: "", label: "Scenario D: Cape Verde vs Egypt"}
+      ]
+    },
+    {
+      title: "Switzerland vs Colombia/Ghana",
+      subtitle: "Tue, Jul 7 - 9:00 PM",
+      options: [
+        {id: "R16_M8_A", home: "B4", away: "K4", hg: "", ag: "", label: "Scenario A: vs Colombia"},
+        {id: "R16_M8_B", home: "B4", away: "L3", hg: "", ag: "", label: "Scenario B: vs Ghana"}
+      ]
+    }
   ]
 };
 
 /* ================= SCORE UPDATE ================= */
 
 function setScore(id, type, val){
-  let m = knockout.R32.find(x => x.id === id);
+  let m = null;
+  for (let matchGroup of knockout.R16) {
+    m = matchGroup.options.find(opt => opt.id === id);
+    if (m) break;
+  }
   if(!m) return;
   m[type] = val === "" ? "" : Number(val);
   renderKnockout();
@@ -181,12 +259,19 @@ function renderKnockout(){
   let div = document.getElementById("bracket");
   div.innerHTML = "";
 
-  knockout.R32.forEach((m, index) => {
-    let w = winner(m);
-    
-    div.innerHTML += `
-      <div class="match">
-        <div class="match-title">Match ${index + 1}</div>
+  knockout.R16.forEach((matchGroup) => {
+    let html = `<div class="match">`;
+    html += `<div class="match-title">${matchGroup.title}<span class="match-subtitle">${matchGroup.subtitle}</span></div>`;
+
+    matchGroup.options.forEach((m, optIndex) => {
+      let w = winner(m);
+      
+      // If there are multiple options, show the scenario label
+      if (matchGroup.options.length > 1) {
+        html += `<div class="scenario-label">${m.label || 'Scenario ' + (optIndex + 1)}</div>`;
+      }
+
+      html += `
         <div class="team-row">
           <span>${display(m.home)}</span>
           <input type="text" value="${m.hg}" onchange="setScore('${m.id}','hg',this.value)">
@@ -196,22 +281,32 @@ function renderKnockout(){
           <input type="text" value="${m.ag}" onchange="setScore('${m.id}','ag',this.value)">
         </div>
         <div class="winner">${w ? "Advances: " + display(w) : "&nbsp;"}</div>
-      </div>
-    `;
+      `;
+
+      // Add a divider if it's not the last option in the box
+      if (optIndex < matchGroup.options.length - 1) {
+        html += `<hr class="scenario-divider">`;
+      }
+    });
+
+    html += `</div>`;
+    div.innerHTML += html;
   });
 }
 
 /* ================= SIMULATE & EXPORT ================= */
 
 function simulateKnockout(){
-  knockout.R32.forEach(m => {
-    if(m.home && m.away) {
-      if(m.hg === "") m.hg = Math.floor(Math.random() * 4);
-      if(m.ag === "") m.ag = Math.floor(Math.random() * 4);
-      if(m.hg === m.ag) {
-        Math.random() > 0.5 ? m.hg++ : m.ag++;
+  knockout.R16.forEach(matchGroup => {
+    matchGroup.options.forEach(m => {
+      if(m.home && m.away) {
+        if(m.hg === "") m.hg = Math.floor(Math.random() * 4);
+        if(m.ag === "") m.ag = Math.floor(Math.random() * 4);
+        if(m.hg === m.ag) {
+          Math.random() > 0.5 ? m.hg++ : m.ag++;
+        }
       }
-    }
+    });
   });
   renderKnockout();
 }
@@ -219,24 +314,26 @@ function simulateKnockout(){
 function exportCSV() {
   let csvContent = "Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name\n";
 
-  knockout.R32.forEach(m => {
-    if(!m || !m.home || !m.away) return;
-    let matchId = m.id, hId = m.home, aId = m.away;
-    let hName = teamData[m.home] ? teamData[m.home].name : m.home;
-    let aName = teamData[m.away] ? teamData[m.away].name : m.away;
-    let hGoals = m.hg !== "" ? m.hg : "-", aGoals = m.ag !== "" ? m.ag : "-";
-    let wId = "Pending", wName = "Pending", w = winner(m);
+  knockout.R16.forEach(matchGroup => {
+    matchGroup.options.forEach(m => {
+      if(!m || !m.home || !m.away) return;
+      let matchId = m.id, hId = m.home, aId = m.away;
+      let hName = teamData[m.home] ? teamData[m.home].name : m.home;
+      let aName = teamData[m.away] ? teamData[m.away].name : m.away;
+      let hGoals = m.hg !== "" ? m.hg : "-", aGoals = m.ag !== "" ? m.ag : "-";
+      let wId = "Pending", wName = "Pending", w = winner(m);
 
-    if(w && teamData[w]) { wId = w; wName = teamData[w].name; } 
-    else if (hGoals === "-" && aGoals === "-") { wId = "Not Played"; wName = "Not Played"; } 
-    else if (hGoals === aGoals && hGoals !== "-") { wId = "Draw"; wName = "Draw"; }
+      if(w && teamData[w]) { wId = w; wName = teamData[w].name; } 
+      else if (hGoals === "-" && aGoals === "-") { wId = "Not Played"; wName = "Not Played"; } 
+      else if (hGoals === aGoals && hGoals !== "-") { wId = "Draw"; wName = "Draw"; }
 
-    csvContent += `"${matchId}","Round of 32","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
+      csvContent += `"${matchId}","Round of 16","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
+    });
   });
 
   let userNameInput = document.getElementById("userName").value.trim();
   let safeUserName = userNameInput.replace(/[^a-zA-Z0-9-]/g, '_');
-  let downloadName = safeUserName ? `${safeUserName}_world_cup_r32.csv` : "world_cup_r32.csv";
+  let downloadName = safeUserName ? `${safeUserName}_world_cup_r16.csv` : "world_cup_r16.csv";
 
   let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   let link = document.createElement("a");
