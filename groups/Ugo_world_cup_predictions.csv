@@ -1,105 +1,73 @@
 Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name
-"GroupA_M1","Group A","A1","Mexico","1","0","A2","South Africa","A1","Mexico"
-"GroupA_M2","Group A","A3","South Korea","1","1","A4","Czech Republic","Draw","Draw"
-"GroupA_M3","Group A","A1","Mexico","0","2","A3","South Korea","A3","South Korea"
-"GroupA_M4","Group A","A2","South Africa","0","0","A4","Czech Republic","Draw","Draw"
-"GroupA_M5","Group A","A1","Mexico","2","1","A4","Czech Republic","A1","Mexico"
-"GroupA_M6","Group A","A2","South Africa","2","2","A3","South Korea","Draw","Draw"
-"GroupB_M1","Group B","B1","Canada","1","1","B2","Bosnia","Draw","Draw"
-"GroupB_M2","Group B","B3","Qatar","0","3","B4","Switzerland","B4","Switzerland"
-"GroupB_M3","Group B","B1","Canada","2","1","B3","Qatar","B1","Canada"
-"GroupB_M4","Group B","B2","Bosnia","0","1","B4","Switzerland","B4","Switzerland"
-"GroupB_M5","Group B","B1","Canada","1","1","B4","Switzerland","Draw","Draw"
-"GroupB_M6","Group B","B2","Bosnia","3","0","B3","Qatar","B2","Bosnia"
-"GroupC_M1","Group C","C1","Brazil","2","1","C2","Morocco","C1","Brazil"
-"GroupC_M2","Group C","C3","Haiti","0","4","C4","Scotland","C4","Scotland"
-"GroupC_M3","Group C","C1","Brazil","6","0","C3","Haiti","C1","Brazil"
-"GroupC_M4","Group C","C2","Morocco","1","1","C4","Scotland","Draw","Draw"
-"GroupC_M5","Group C","C1","Brazil","2","0","C4","Scotland","C1","Brazil"
-"GroupC_M6","Group C","C2","Morocco","3","1","C3","Haiti","C2","Morocco"
-"GroupD_M1","Group D","D1","USA","1","1","D2","Paraguay","Draw","Draw"
-"GroupD_M2","Group D","D3","Australia","0","2","D4","Turkey","D4","Turkey"
-"GroupD_M3","Group D","D1","USA","1","1","D3","Australia","Draw","Draw"
-"GroupD_M4","Group D","D2","Paraguay","1","2","D4","Turkey","D4","Turkey"
-"GroupD_M5","Group D","D1","USA","0","2","D4","Turkey","D4","Turkey"
-"GroupD_M6","Group D","D2","Paraguay","1","1","D3","Australia","Draw","Draw"
-"GroupE_M1","Group E","E1","Germany","4","0","E2","Curaçao","E1","Germany"
-"GroupE_M2","Group E","E3","Ivory Coast","0","0","E4","Ecuador","Draw","Draw"
-"GroupE_M3","Group E","E1","Germany","0","1","E3","Ivory Coast","E3","Ivory Coast"
-"GroupE_M4","Group E","E2","Curaçao","0","5","E4","Ecuador","E4","Ecuador"
-"GroupE_M5","Group E","E1","Germany","1","2","E4","Ecuador","E4","Ecuador"
-"GroupE_M6","Group E","E2","Curaçao","0","3","E3","Ivory Coast","E3","Ivory Coast"
-"GroupF_M1","Group F","F1","Netherlands","1","1","F2","Japan","Draw","Draw"
-"GroupF_M2","Group F","F3","Sweden","1","0","F4","Tunisia","F3","Sweden"
-"GroupF_M3","Group F","F1","Netherlands","1","1","F3","Sweden","Draw","Draw"
-"GroupF_M4","Group F","F2","Japan","2","0","F4","Tunisia","F2","Japan"
-"GroupF_M5","Group F","F1","Netherlands","1","0","F4","Tunisia","F1","Netherlands"
-"GroupF_M6","Group F","F2","Japan","2","0","F3","Sweden","F2","Japan"
-"GroupG_M1","Group G","G1","Belgium","0","0","G2","Egypt","Draw","Draw"
-"GroupG_M2","Group G","G3","Iran","1","1","G4","New Zealand","Draw","Draw"
-"GroupG_M3","Group G","G1","Belgium","3","1","G3","Iran","G1","Belgium"
-"GroupG_M4","Group G","G2","Egypt","1","0","G4","New Zealand","G2","Egypt"
-"GroupG_M5","Group G","G1","Belgium","2","0","G4","New Zealand","G1","Belgium"
-"GroupG_M6","Group G","G2","Egypt","2","0","G3","Iran","G2","Egypt"
-"GroupH_M1","Group H","H1","Spain","4","0","H2","Cape Verde","H1","Spain"
-"GroupH_M2","Group H","H3","Saudi Arabia","0","1","H4","Uruguay","H4","Uruguay"
-"GroupH_M3","Group H","H1","Spain","3","0","H3","Saudi Arabia","H1","Spain"
-"GroupH_M4","Group H","H2","Cape Verde","0","3","H4","Uruguay","H4","Uruguay"
-"GroupH_M5","Group H","H1","Spain","2","0","H4","Uruguay","H1","Spain"
-"GroupH_M6","Group H","H2","Cape Verde","0","0","H3","Saudi Arabia","Draw","Draw"
-"GroupI_M1","Group I","I1","France","1","1","I2","Senegal","Draw","Draw"
-"GroupI_M2","Group I","I3","Iraq","1","4","I4","Norway","I4","Norway"
-"GroupI_M3","Group I","I1","France","4","0","I3","Iraq","I1","France"
-"GroupI_M4","Group I","I2","Senegal","2","1","I4","Norway","I2","Senegal"
-"GroupI_M5","Group I","I1","France","3","1","I4","Norway","I1","France"
-"GroupI_M6","Group I","I2","Senegal","3","0","I3","Iraq","I2","Senegal"
-"GroupJ_M1","Group J","J1","Argentina","2","1","J2","Algeria","J1","Argentina"
-"GroupJ_M2","Group J","J3","Austria","2","0","J4","Jordan","J3","Austria"
-"GroupJ_M3","Group J","J1","Argentina","2","1","J3","Austria","J1","Argentina"
-"GroupJ_M4","Group J","J2","Algeria","3","0","J4","Jordan","J2","Algeria"
-"GroupJ_M5","Group J","J1","Argentina","5","0","J4","Jordan","J1","Argentina"
-"GroupJ_M6","Group J","J2","Algeria","1","1","J3","Austria","Draw","Draw"
-"GroupK_M1","Group K","K1","Portugal","2","1","K2","DR Congo","K1","Portugal"
-"GroupK_M2","Group K","K3","Uzbekistan","0","3","K4","Colombia","K4","Colombia"
-"GroupK_M3","Group K","K1","Portugal","3","0","K3","Uzbekistan","K1","Portugal"
-"GroupK_M4","Group K","K2","DR Congo","0","2","K4","Colombia","K4","Colombia"
-"GroupK_M5","Group K","K1","Portugal","1","1","K4","Colombia","Draw","Draw"
-"GroupK_M6","Group K","K2","DR Congo","2","1","K3","Uzbekistan","K2","DR Congo"
-"GroupL_M1","Group L","L1","England","1","0","L2","Croatia","L1","England"
-"GroupL_M2","Group L","L3","Ghana","4","0","L4","Panama","L3","Ghana"
-"GroupL_M3","Group L","L1","England","1","2","L3","Ghana","L3","Ghana"
-"GroupL_M4","Group L","L2","Croatia","2","0","L4","Panama","L2","Croatia"
-"GroupL_M5","Group L","L1","England","6","0","L4","Panama","L1","England"
-"GroupL_M6","Group L","L2","Croatia","0","1","L3","Ghana","L3","Ghana"
-"R32_M1","Round of 32","A1","Mexico","3","4","E1","Germany","E1","Germany"
-"R32_M2","Round of 32","L3","Ghana","3","1","F3","Sweden","L3","Ghana"
-"R32_M3","Round of 32","C1","Brazil","0","3","F1","Netherlands","F1","Netherlands"
-"R32_M4","Round of 32","E3","Ivory Coast","3","2","I2","Senegal","E3","Ivory Coast"
-"R32_M5","Round of 32","J1","Argentina","1","0","H4","Uruguay","J1","Argentina"
-"R32_M6","Round of 32","B4","Switzerland","1","3","I4","Norway","I4","Norway"
-"R32_M7","Round of 32","K4","Colombia","3","2","J3","Austria","K4","Colombia"
-"R32_M8","Round of 32","D2","Paraguay","1","0","G2","Egypt","D2","Paraguay"
-"R32_M9","Round of 32","E4","Ecuador","3","4","L2","Croatia","L2","Croatia"
-"R32_M10","Round of 32","I1","France","1","0","K2","DR Congo","I1","France"
-"R32_M11","Round of 32","F2","Japan","2","1","C4","Scotland","F2","Japan"
-"R32_M12","Round of 32","A3","South Korea","2","0","B1","Canada","A3","South Korea"
-"R32_M13","Round of 32","D4","Turkey","1","0","B2","Bosnia","D4","Turkey"
-"R32_M14","Round of 32","G1","Belgium","0","2","C2","Morocco","C2","Morocco"
-"R32_M15","Round of 32","H1","Spain","3","0","J2","Algeria","H1","Spain"
-"R32_M16","Round of 32","K1","Portugal","0","1","L1","England","L1","England"
-"R16_M1","Round of 16","E1","Germany","3","2","L3","Ghana","E1","Germany"
-"R16_M2","Round of 16","F1","Netherlands","1","0","E3","Ivory Coast","F1","Netherlands"
-"R16_M3","Round of 16","J1","Argentina","2","1","I4","Norway","J1","Argentina"
-"R16_M4","Round of 16","K4","Colombia","2","1","D2","Paraguay","K4","Colombia"
-"R16_M5","Round of 16","L2","Croatia","0","2","I1","France","I1","France"
-"R16_M6","Round of 16","F2","Japan","2","0","A3","South Korea","F2","Japan"
-"R16_M7","Round of 16","D4","Turkey","1","0","C2","Morocco","D4","Turkey"
-"R16_M8","Round of 16","H1","Spain","3","1","L1","England","H1","Spain"
-"QF_M1","Quarter Finals","E1","Germany","1","0","F1","Netherlands","E1","Germany"
-"QF_M2","Quarter Finals","J1","Argentina","1","2","K4","Colombia","K4","Colombia"
-"QF_M3","Quarter Finals","I1","France","2","1","F2","Japan","I1","France"
-"QF_M4","Quarter Finals","D4","Turkey","1","3","H1","Spain","H1","Spain"
-"SF_M1","Semi Finals","E1","Germany","0","2","K4","Colombia","K4","Colombia"
-"SF_M2","Semi Finals","I1","France","1","2","H1","Spain","H1","Spain"
-"P3_M1","3rd Place","E1","Germany","0","1","I1","France","I1","France"
-"F_M1","Final","K4","Colombia","0","1","H1","Spain","H1","Spain"
+GroupA_M1,Group A,A1,Mexico,1,0,A2,South Africa,A1,Mexico
+GroupA_M2,Group A,A3,South Korea,1,1,A4,Czech Republic,Draw,Draw
+GroupA_M3,Group A,A1,Mexico,0,2,A3,South Korea,A3,South Korea
+GroupA_M4,Group A,A2,South Africa,0,0,A4,Czech Republic,Draw,Draw
+GroupA_M5,Group A,A1,Mexico,2,1,A4,Czech Republic,A1,Mexico
+GroupA_M6,Group A,A2,South Africa,2,2,A3,South Korea,Draw,Draw
+GroupB_M1,Group B,B1,Canada,1,1,B2,Bosnia,Draw,Draw
+GroupB_M2,Group B,B3,Qatar,0,3,B4,Switzerland,B4,Switzerland
+GroupB_M3,Group B,B1,Canada,2,1,B3,Qatar,B1,Canada
+GroupB_M4,Group B,B2,Bosnia,0,1,B4,Switzerland,B4,Switzerland
+GroupB_M5,Group B,B1,Canada,1,1,B4,Switzerland,Draw,Draw
+GroupB_M6,Group B,B2,Bosnia,3,0,B3,Qatar,B2,Bosnia
+GroupC_M1,Group C,C1,Brazil,2,1,C2,Morocco,C1,Brazil
+GroupC_M2,Group C,C3,Haiti,0,4,C4,Scotland,C4,Scotland
+GroupC_M3,Group C,C1,Brazil,6,0,C3,Haiti,C1,Brazil
+GroupC_M4,Group C,C2,Morocco,1,1,C4,Scotland,Draw,Draw
+GroupC_M5,Group C,C1,Brazil,2,0,C4,Scotland,C1,Brazil
+GroupC_M6,Group C,C2,Morocco,3,1,C3,Haiti,C2,Morocco
+GroupD_M1,Group D,D1,USA,1,1,D2,Paraguay,Draw,Draw
+GroupD_M2,Group D,D3,Australia,0,2,D4,Turkey,D4,Turkey
+GroupD_M3,Group D,D1,USA,1,1,D3,Australia,Draw,Draw
+GroupD_M4,Group D,D2,Paraguay,1,2,D4,Turkey,D4,Turkey
+GroupD_M5,Group D,D1,USA,0,2,D4,Turkey,D4,Turkey
+GroupD_M6,Group D,D2,Paraguay,1,1,D3,Australia,Draw,Draw
+GroupE_M1,Group E,E1,Germany,4,0,E2,Curaçao,E1,Germany
+GroupE_M2,Group E,E3,Ivory Coast,0,0,E4,Ecuador,Draw,Draw
+GroupE_M3,Group E,E1,Germany,0,1,E3,Ivory Coast,E3,Ivory Coast
+GroupE_M4,Group E,E2,Curaçao,0,5,E4,Ecuador,E4,Ecuador
+GroupE_M5,Group E,E1,Germany,1,2,E4,Ecuador,E4,Ecuador
+GroupE_M6,Group E,E2,Curaçao,0,3,E3,Ivory Coast,E3,Ivory Coast
+GroupF_M1,Group F,F1,Netherlands,1,1,F2,Japan,Draw,Draw
+GroupF_M2,Group F,F3,Sweden,1,0,F4,Tunisia,F3,Sweden
+GroupF_M3,Group F,F1,Netherlands,1,1,F3,Sweden,Draw,Draw
+GroupF_M4,Group F,F2,Japan,2,0,F4,Tunisia,F2,Japan
+GroupF_M5,Group F,F1,Netherlands,1,0,F4,Tunisia,F1,Netherlands
+GroupF_M6,Group F,F2,Japan,2,0,F3,Sweden,F2,Japan
+GroupG_M1,Group G,G1,Belgium,0,0,G2,Egypt,Draw,Draw
+GroupG_M2,Group G,G3,Iran,1,1,G4,New Zealand,Draw,Draw
+GroupG_M3,Group G,G1,Belgium,3,1,G3,Iran,G1,Belgium
+GroupG_M4,Group G,G2,Egypt,1,0,G4,New Zealand,G2,Egypt
+GroupG_M5,Group G,G1,Belgium,2,0,G4,New Zealand,G1,Belgium
+GroupG_M6,Group G,G2,Egypt,2,0,G3,Iran,G2,Egypt
+GroupH_M1,Group H,H1,Spain,4,0,H2,Cape Verde,H1,Spain
+GroupH_M2,Group H,H3,Saudi Arabia,0,1,H4,Uruguay,H4,Uruguay
+GroupH_M3,Group H,H1,Spain,3,0,H3,Saudi Arabia,H1,Spain
+GroupH_M4,Group H,H2,Cape Verde,0,3,H4,Uruguay,H4,Uruguay
+GroupH_M5,Group H,H1,Spain,2,0,H4,Uruguay,H1,Spain
+GroupH_M6,Group H,H2,Cape Verde,0,0,H3,Saudi Arabia,Draw,Draw
+GroupI_M1,Group I,I1,France,1,1,I2,Senegal,Draw,Draw
+GroupI_M2,Group I,I3,Iraq,1,4,I4,Norway,I4,Norway
+GroupI_M3,Group I,I1,France,4,0,I3,Iraq,I1,France
+GroupI_M4,Group I,I2,Senegal,2,1,I4,Norway,I2,Senegal
+GroupI_M5,Group I,I1,France,3,1,I4,Norway,I1,France
+GroupI_M6,Group I,I2,Senegal,3,0,I3,Iraq,I2,Senegal
+GroupJ_M1,Group J,J1,Argentina,2,1,J2,Algeria,J1,Argentina
+GroupJ_M2,Group J,J3,Austria,2,0,J4,Jordan,J3,Austria
+GroupJ_M3,Group J,J1,Argentina,2,1,J3,Austria,J1,Argentina
+GroupJ_M4,Group J,J2,Algeria,3,0,J4,Jordan,J2,Algeria
+GroupJ_M5,Group J,J1,Argentina,5,0,J4,Jordan,J1,Argentina
+GroupJ_M6,Group J,J2,Algeria,1,1,J3,Austria,Draw,Draw
+GroupK_M1,Group K,K1,Portugal,2,1,K2,DR Congo,K1,Portugal
+GroupK_M2,Group K,K3,Uzbekistan,0,3,K4,Colombia,K4,Colombia
+GroupK_M3,Group K,K1,Portugal,3,0,K3,Uzbekistan,K1,Portugal
+GroupK_M4,Group K,K2,DR Congo,0,2,K4,Colombia,K4,Colombia
+GroupK_M5,Group K,K1,Portugal,1,1,K4,Colombia,Draw,Draw
+GroupK_M6,Group K,K2,DR Congo,2,1,K3,Uzbekistan,K2,DR Congo
+GroupL_M1,Group L,L1,England,1,0,L2,Croatia,L1,England
+GroupL_M2,Group L,L3,Ghana,4,0,L4,Panama,L3,Ghana
+GroupL_M3,Group L,L1,England,1,2,L3,Ghana,L3,Ghana
+GroupL_M4,Group L,L2,Croatia,2,0,L4,Panama,L2,Croatia
+GroupL_M5,Group L,L1,England,6,0,L4,Panama,L1,England
+GroupL_M6,Group L,L2,Croatia,0,1,L3,Ghana,L3,Ghana
