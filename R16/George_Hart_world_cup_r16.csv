@@ -1,0 +1,13 @@
+Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name
+"R16_M1","Round of 16","B1","Canada","1","2","C2","Morocco","C2","Morocco"
+"R16_M2","Round of 16","D2","Paraguay","0","4","I1","France","I1","France"
+"R16_M3","Round of 16","C1","Brazil","3","2","I4","Norway","C1","Brazil"
+"R16_M4","Round of 16","A1","Mexico","1","2","L1","England","L1","England"
+"R16_M5","Round of 16","K1","Portugal","2","3","H1","Spain","H1","Spain"
+"R16_M6","Round of 16","D1","USA","0","1","G1","Belgium","G1","Belgium"
+"R16_M7_A","Round of 16","J1","Argentina","3","0","D3","Australia","J1","Argentina"
+"R16_M7_B","Round of 16","J1","Argentina","3","1","G2","Egypt","J1","Argentina"
+"R16_M7_C","Round of 16","H2","Cape Verde","0","1","D3","Australia","D3","Australia"
+"R16_M7_D","Round of 16","H2","Cape Verde","0","2","G2","Egypt","G2","Egypt"
+"R16_M8_A","Round of 16","B4","Switzerland","2","1","K4","Colombia","B4","Switzerland"
+"R16_M8_B","Round of 16","B4","Switzerland","2","1","L3","Ghana","B4","Switzerland"
