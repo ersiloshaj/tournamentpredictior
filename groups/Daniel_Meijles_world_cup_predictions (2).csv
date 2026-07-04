@@ -1,0 +1,105 @@
+Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name
+GroupA_M1,Group A,A1,Mexico,2,0,A2,South Africa,A1,Mexico
+GroupA_M2,Group A,A3,South Korea,1,2,A4,Czech Republic,A4,Czech Republic
+GroupA_M3,Group A,A1,Mexico,1,0,A3,South Korea,A1,Mexico
+GroupA_M4,Group A,A2,South Africa,0,1,A4,Czech Republic,A4,Czech Republic
+GroupA_M5,Group A,A1,Mexico,1,0,A4,Czech Republic,A1,Mexico
+GroupA_M6,Group A,A2,South Africa,0,1,A3,South Korea,A3,South Korea
+GroupB_M1,Group B,B1,Canada,2,1,B2,Bosnia,B1,Canada
+GroupB_M2,Group B,B3,Qatar,0,3,B4,Switzerland,B4,Switzerland
+GroupB_M3,Group B,B1,Canada,2,0,B3,Qatar,B1,Canada
+GroupB_M4,Group B,B2,Bosnia,0,1,B4,Switzerland,B4,Switzerland
+GroupB_M5,Group B,B1,Canada,1,2,B4,Switzerland,B4,Switzerland
+GroupB_M6,Group B,B2,Bosnia,1,0,B3,Qatar,B2,Bosnia
+GroupC_M1,Group C,C1,Brazil,4,1,C2,Morocco,C1,Brazil
+GroupC_M2,Group C,C3,Haiti,0,3,C4,Scotland,C4,Scotland
+GroupC_M3,Group C,C1,Brazil,3,0,C3,Haiti,C1,Brazil
+GroupC_M4,Group C,C2,Morocco,1,1,C4,Scotland,Draw,Draw
+GroupC_M5,Group C,C1,Brazil,2,1,C4,Scotland,C1,Brazil
+GroupC_M6,Group C,C2,Morocco,2,1,C3,Haiti,C2,Morocco
+GroupD_M1,Group D,D1,USA,1,0,D2,Paraguay,D1,USA
+GroupD_M2,Group D,D3,Australia,1,2,D4,Turkey,D4,Turkey
+GroupD_M3,Group D,D1,USA,0,1,D3,Australia,D3,Australia
+GroupD_M4,Group D,D2,Paraguay,1,2,D4,Turkey,D4,Turkey
+GroupD_M5,Group D,D1,USA,1,1,D4,Turkey,Draw,Draw
+GroupD_M6,Group D,D2,Paraguay,0,2,D3,Australia,D3,Australia
+GroupE_M1,Group E,E1,Germany,4,0,E2,Curaçao,E1,Germany
+GroupE_M2,Group E,E3,Ivory Coast,0,1,E4,Ecuador,E4,Ecuador
+GroupE_M3,Group E,E1,Germany,2,0,E3,Ivory Coast,E1,Germany
+GroupE_M4,Group E,E2,Curaçao,0,1,E4,Ecuador,E4,Ecuador
+GroupE_M5,Group E,E1,Germany,1,0,E4,Ecuador,E1,Germany
+GroupE_M6,Group E,E2,Curaçao,0,1,E3,Ivory Coast,E3,Ivory Coast
+GroupF_M1,Group F,F1,Netherlands,2,1,F2,Japan,F1,Netherlands
+GroupF_M2,Group F,F3,Sweden,2,0,F4,Tunisia,F3,Sweden
+GroupF_M3,Group F,F1,Netherlands,1,0,F3,Sweden,F1,Netherlands
+GroupF_M4,Group F,F2,Japan,2,1,F4,Tunisia,F2,Japan
+GroupF_M5,Group F,F1,Netherlands,3,1,F4,Tunisia,F1,Netherlands
+GroupF_M6,Group F,F2,Japan,0,1,F3,Sweden,F3,Sweden
+GroupG_M1,Group G,G1,Belgium,3,0,G2,Egypt,G1,Belgium
+GroupG_M2,Group G,G3,Iran,1,2,G4,New Zealand,G4,New Zealand
+GroupG_M3,Group G,G1,Belgium,2,0,G3,Iran,G1,Belgium
+GroupG_M4,Group G,G2,Egypt,1,1,G4,New Zealand,Draw,Draw
+GroupG_M5,Group G,G1,Belgium,1,0,G4,New Zealand,G1,Belgium
+GroupG_M6,Group G,G2,Egypt,1,1,G3,Iran,Draw,Draw
+GroupH_M1,Group H,H1,Spain,5,1,H2,Cape Verde,H1,Spain
+GroupH_M2,Group H,H3,Saudi Arabia,0,4,H4,Uruguay,H4,Uruguay
+GroupH_M3,Group H,H1,Spain,2,0,H3,Saudi Arabia,H1,Spain
+GroupH_M4,Group H,H2,Cape Verde,0,2,H4,Uruguay,H4,Uruguay
+GroupH_M5,Group H,H1,Spain,1,1,H4,Uruguay,Draw,Draw
+GroupH_M6,Group H,H2,Cape Verde,0,1,H3,Saudi Arabia,H3,Saudi Arabia
+GroupI_M1,Group I,I1,France,3,0,I2,Senegal,I1,France
+GroupI_M2,Group I,I3,Iraq,0,2,I4,Norway,I4,Norway
+GroupI_M3,Group I,I1,France,2,0,I3,Iraq,I1,France
+GroupI_M4,Group I,I2,Senegal,1,1,I4,Norway,Draw,Draw
+GroupI_M5,Group I,I1,France,1,2,I4,Norway,I4,Norway
+GroupI_M6,Group I,I2,Senegal,2,0,I3,Iraq,I2,Senegal
+GroupJ_M1,Group J,J1,Argentina,2,0,J2,Algeria,J1,Argentina
+GroupJ_M2,Group J,J3,Austria,3,0,J4,Jordan,J3,Austria
+GroupJ_M3,Group J,J1,Argentina,1,2,J3,Austria,J3,Austria
+GroupJ_M4,Group J,J2,Algeria,1,0,J4,Jordan,J2,Algeria
+GroupJ_M5,Group J,J1,Argentina,3,0,J4,Jordan,J1,Argentina
+GroupJ_M6,Group J,J2,Algeria,0,1,J3,Austria,J3,Austria
+GroupK_M1,Group K,K1,Portugal,5,0,K2,DR Congo,K1,Portugal
+GroupK_M2,Group K,K3,Uzbekistan,0,3,K4,Colombia,K4,Colombia
+GroupK_M3,Group K,K1,Portugal,3,0,K3,Uzbekistan,K1,Portugal
+GroupK_M4,Group K,K2,DR Congo,0,2,K4,Colombia,K4,Colombia
+GroupK_M5,Group K,K1,Portugal,1,2,K4,Colombia,K4,Colombia
+GroupK_M6,Group K,K2,DR Congo,0,1,K3,Uzbekistan,K3,Uzbekistan
+GroupL_M1,Group L,L1,England,2,1,L2,Croatia,L1,England
+GroupL_M2,Group L,L3,Ghana,1,2,L4,Panama,L4,Panama
+GroupL_M3,Group L,L1,England,1,0,L3,Ghana,L1,England
+GroupL_M4,Group L,L2,Croatia,2,0,L4,Panama,L2,Croatia
+GroupL_M5,Group L,L1,England,2,0,L4,Panama,L1,England
+GroupL_M6,Group L,L2,Croatia,1,0,L3,Ghana,L2,Croatia
+R32_M1,Round of 32,A1,Mexico,2,0,B2,Bosnia,A1,Mexico
+R32_M2,Round of 32,L1,England,2,1,F2,Japan,L1,England
+R32_M3,Round of 32,C1,Brazil,3,1,F3,Sweden,C1,Brazil
+R32_M4,Round of 32,E4,Ecuador,0,2,I1,France,I1,France
+R32_M5,Round of 32,J3,Austria,2,1,H4,Uruguay,J3,Austria
+R32_M6,Round of 32,B4,Switzerland,1,0,A3,South Korea,B4,Switzerland
+R32_M7,Round of 32,K4,Colombia,3,0,C2,Morocco,K4,Colombia
+R32_M8,Round of 32,D3,Australia,1,0,G4,New Zealand,D3,Australia
+R32_M9,Round of 32,E1,Germany,3,0,J2,Algeria,E1,Germany
+R32_M10,Round of 32,I4,Norway,2,1,E3,Ivory Coast,I4,Norway
+R32_M11,Round of 32,F1,Netherlands,3,1,C4,Scotland,F1,Netherlands
+R32_M12,Round of 32,A4,Czech Republic,2,0,B1,Canada,A4,Czech Republic
+R32_M13,Round of 32,D4,Turkey,1,0,I2,Senegal,D4,Turkey
+R32_M14,Round of 32,G1,Belgium,2,0,D1,USA,G1,Belgium
+R32_M15,Round of 32,H1,Spain,2,1,J1,Argentina,H1,Spain
+R32_M16,Round of 32,K1,Portugal,2,0,L2,Croatia,K1,Portugal
+R16_M1,Round of 16,A1,Mexico,1,2,L1,England,L1,England
+R16_M2,Round of 16,C1,Brazil,2,1,I1,France,C1,Brazil
+R16_M3,Round of 16,J3,Austria,1,0,B4,Switzerland,J3,Austria
+R16_M4,Round of 16,K4,Colombia,2,0,D3,Australia,K4,Colombia
+R16_M5,Round of 16,E1,Germany,2,1,I4,Norway,E1,Germany
+R16_M6,Round of 16,F1,Netherlands,2,1,A4,Czech Republic,F1,Netherlands
+R16_M7,Round of 16,D4,Turkey,0,2,G1,Belgium,G1,Belgium
+R16_M8,Round of 16,H1,Spain,3,1,K1,Portugal,H1,Spain
+QF_M1,Quarter Finals,L1,England,1,2,C1,Brazil,C1,Brazil
+QF_M2,Quarter Finals,J3,Austria,1,0,K4,Colombia,J3,Austria
+QF_M3,Quarter Finals,E1,Germany,2,3,F1,Netherlands,F1,Netherlands
+QF_M4,Quarter Finals,G1,Belgium,1,2,H1,Spain,H1,Spain
+SF_M1,Semi Finals,C1,Brazil,3,1,J3,Austria,C1,Brazil
+SF_M2,Semi Finals,F1,Netherlands,2,1,H1,Spain,F1,Netherlands
+P3_M1,3rd Place,J3,Austria,0,2,H1,Spain,H1,Spain
+F_M1,Final,C1,Brazil,1,4,F1,Netherlands,F1,Netherlands
