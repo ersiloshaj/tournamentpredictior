@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>2026 World Cup - Round of 16 Predictor</title>
+<title>2026 World Cup - Round of 8 Predictor</title>
 
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; margin: 0; }
@@ -129,7 +129,7 @@
 <body>
 
 <div class="header-controls">
-  <h1>CSGUL Round of 16 Predictor</h1>
+  <h1>🏆 CSGUL Round of 8 Predictor</h1>
   <div class="export-container">
     <button class="btn-sim" onclick="simulateKnockout()">🎲 Random Simulate</button>
     <input type="text" id="userName" class="name-input" placeholder="Enter your name">
@@ -167,64 +167,39 @@ function display(id){
 /* ================= FIXTURES STATE ================= */
 
 let knockout = {
-  R16: [
-    // --- CONFIRMED FIXTURES ---
+  R8: [
+    // --- 100% CONFIRMED MATCHUPS ---
     {
-      title: "Canada vs Morocco",
-      subtitle: "Jul 4 - 6:00 PM",
+      title: "Quarter-Final 1",
+      subtitle: "Confirmed Fixture",
       options: [
-        {id: "R16_M1", home: "B1", away: "C2", hg: "", ag: ""} 
+        {id: "R8_M1", home: "C2", away: "I1", hg: "", ag: ""} // Morocco vs France
       ]
     },
     {
-      title: "Paraguay vs France",
-      subtitle: "Jul 4 10:00 PM",
+      title: "Quarter-Final 2",
+      subtitle: "Confirmed Fixture",
       options: [
-        {id: "R16_M2", home: "D2", away: "I1", hg: "", ag: ""} 
+        {id: "R8_M2", home: "I4", away: "L1", hg: "", ag: ""} // Norway vs England
       ]
     },
     {
-      title: "Brazil vs Norway",
-      subtitle: "Sun, Jul 5 - 9:00 PM",
+      title: "Quarter-Final 3",
+      subtitle: "Confirmed Fixture",
       options: [
-        {id: "R16_M3", home: "C1", away: "I4", hg: "", ag: ""} 
+        {id: "R8_M3", home: "H1", away: "G1", hg: "", ag: ""} // Spain vs Belgium
       ]
     },
+    
+    // --- UNCONFIRMED MATCHUP SCENARIOS ---
     {
-      title: "Mexico vs England",
-      subtitle: "Mon, Jul 6 - 1:00 AM",
+      title: "Quarter-Final 4",
+      subtitle: "Argentina/Egypt vs Switzerland/Colombia",
       options: [
-        {id: "R16_M4", home: "A1", away: "L1", hg: "", ag: ""} 
-      ]
-    },
-    {
-      title: "Portugal vs Spain",
-      subtitle: "Mon, Jul 6 - 8:00 PM",
-      options: [
-        {id: "R16_M5", home: "K1", away: "H1", hg: "", ag: ""} 
-      ]
-    },
-    {
-      title: "USA vs Belgium",
-      subtitle: "Tue, Jul 7 - 1:00 AM",
-      options: [
-        {id: "R16_M6", home: "D1", away: "G1", hg: "", ag: ""} 
-      ]
-    },
-
-    // --- UNCONFIRMED FIXTURES ---
-    {
-      title: "Argentina vs Egypt",
-      subtitle: "Tue, Jul 7 - 5:00 PM",
-      options: [
-        {id: "R16_M7_B", home: "J1", away: "G2", hg: "", ag: "", label: "Scenario B: Argentina vs Egypt"}
-      ]
-    },
-    {
-      title: "Switzerland vs Colombia",
-      subtitle: "Tue, Jul 7 - 9:00 PM",
-      options: [
-        {id: "R16_M8_A", home: "B4", away: "K4", hg: "", ag: "", label: "Scenario A: vs Colombia"}
+        {id: "R8_M4_A", home: "J1", away: "B4", hg: "", ag: "", label: "Scenario A: Argentina vs Switzerland"},
+        {id: "R8_M4_B", home: "J1", away: "K4", hg: "", ag: "", label: "Scenario B: Argentina vs Colombia"},
+        {id: "R8_M4_C", home: "G2", away: "B4", hg: "", ag: "", label: "Scenario C: Egypt vs Switzerland"},
+        {id: "R8_M4_D", home: "G2", away: "K4", hg: "", ag: "", label: "Scenario D: Egypt vs Colombia"}
       ]
     }
   ]
@@ -234,7 +209,7 @@ let knockout = {
 
 function setScore(id, type, val){
   let m = null;
-  for (let matchGroup of knockout.R16) {
+  for (let matchGroup of knockout.R8) {
     m = matchGroup.options.find(opt => opt.id === id);
     if (m) break;
   }
@@ -255,14 +230,13 @@ function renderKnockout(){
   let div = document.getElementById("bracket");
   div.innerHTML = "";
 
-  knockout.R16.forEach((matchGroup) => {
+  knockout.R8.forEach((matchGroup) => {
     let html = `<div class="match">`;
     html += `<div class="match-title">${matchGroup.title}<span class="match-subtitle">${matchGroup.subtitle}</span></div>`;
 
     matchGroup.options.forEach((m, optIndex) => {
       let w = winner(m);
       
-      // If there are multiple options, show the scenario label
       if (matchGroup.options.length > 1) {
         html += `<div class="scenario-label">${m.label || 'Scenario ' + (optIndex + 1)}</div>`;
       }
@@ -279,7 +253,6 @@ function renderKnockout(){
         <div class="winner">${w ? "Advances: " + display(w) : "&nbsp;"}</div>
       `;
 
-      // Add a divider if it's not the last option in the box
       if (optIndex < matchGroup.options.length - 1) {
         html += `<hr class="scenario-divider">`;
       }
@@ -293,7 +266,7 @@ function renderKnockout(){
 /* ================= SIMULATE & EXPORT ================= */
 
 function simulateKnockout(){
-  knockout.R16.forEach(matchGroup => {
+  knockout.R8.forEach(matchGroup => {
     matchGroup.options.forEach(m => {
       if(m.home && m.away) {
         if(m.hg === "") m.hg = Math.floor(Math.random() * 4);
@@ -310,7 +283,7 @@ function simulateKnockout(){
 function exportCSV() {
   let csvContent = "Match ID,Stage,Home ID,Home Team,Home Goals,Away Goals,Away ID,Away Team,Winner ID,Winner Name\n";
 
-  knockout.R16.forEach(matchGroup => {
+  knockout.R8.forEach(matchGroup => {
     matchGroup.options.forEach(m => {
       if(!m || !m.home || !m.away) return;
       let matchId = m.id, hId = m.home, aId = m.away;
@@ -323,13 +296,13 @@ function exportCSV() {
       else if (hGoals === "-" && aGoals === "-") { wId = "Not Played"; wName = "Not Played"; } 
       else if (hGoals === aGoals && hGoals !== "-") { wId = "Draw"; wName = "Draw"; }
 
-      csvContent += `"${matchId}","Round of 16","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
+      csvContent += `"${matchId}","Round of 8","${hId}","${hName}","${hGoals}","${aGoals}","${aId}","${aName}","${wId}","${wName}"\n`;
     });
   });
 
   let userNameInput = document.getElementById("userName").value.trim();
   let safeUserName = userNameInput.replace(/[^a-zA-Z0-9-]/g, '_');
-  let downloadName = safeUserName ? `${safeUserName}_world_cup_r16.csv` : "world_cup_r16.csv";
+  let downloadName = safeUserName ? `${safeUserName}_world_cup_r8.csv` : "world_cup_r8.csv";
 
   let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   let link = document.createElement("a");
