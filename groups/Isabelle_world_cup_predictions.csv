@@ -71,35 +71,3 @@ GroupL_M3,Group L,L1,England,2,0,L3,Ghana,L1,England
 GroupL_M4,Group L,L2,Croatia,3,1,L4,Panama,L2,Croatia
 GroupL_M5,Group L,L1,England,4,1,L4,Panama,L1,England
 GroupL_M6,Group L,L2,Croatia,4,0,L3,Ghana,L2,Croatia
-R32_M1,Round of 32,A4,Czech Republic,2,1,I4,Norway,A4,Czech Republic
-R32_M2,Round of 32,L1,England,3,1,F4,Tunisia,L1,England
-R32_M3,Round of 32,C1,Brazil,2,1,F3,Sweden,C1,Brazil
-R32_M4,Round of 32,E1,Germany,2,1,I2,Senegal,E1,Germany
-R32_M5,Round of 32,J1,Argentina,3,1,H4,Uruguay,J1,Argentina
-R32_M6,Round of 32,B1,Canada,3,1,C4,Scotland,B1,Canada
-R32_M7,Round of 32,K1,Portugal,4,0,H3,Saudi Arabia,K1,Portugal
-R32_M8,Round of 32,D2,Paraguay,2,1,G4,New Zealand,D2,Paraguay
-R32_M9,Round of 32,E3,Ivory Coast,3,1,L3,Ghana,E3,Ivory Coast
-R32_M10,Round of 32,I1,France,4,1,E4,Ecuador,I1,France
-R32_M11,Round of 32,F1,Netherlands,1,3,C2,Morocco,C2,Morocco
-R32_M12,Round of 32,A1,Mexico,2,1,B4,Switzerland,A1,Mexico
-R32_M13,Round of 32,D1,USA,2,1,J3,Austria,D1,USA
-R32_M14,Round of 32,G1,Belgium,3,0,D3,Australia,G1,Belgium
-R32_M15,Round of 32,H1,Spain,2,1,J2,Algeria,H1,Spain
-R32_M16,Round of 32,K4,Colombia,2,3,L2,Croatia,L2,Croatia
-R16_M1,Round of 16,A4,Czech Republic,1,3,L1,England,L1,England
-R16_M2,Round of 16,C1,Brazil,1,3,E1,Germany,E1,Germany
-R16_M3,Round of 16,J1,Argentina,3,1,B1,Canada,J1,Argentina
-R16_M4,Round of 16,K1,Portugal,2,1,D2,Paraguay,K1,Portugal
-R16_M5,Round of 16,E3,Ivory Coast,1,3,I1,France,I1,France
-R16_M6,Round of 16,C2,Morocco,2,1,A1,Mexico,C2,Morocco
-R16_M7,Round of 16,D1,USA,1,0,G1,Belgium,D1,USA
-R16_M8,Round of 16,H1,Spain,3,1,L2,Croatia,H1,Spain
-QF_M1,Quarter Finals,L1,England,3,2,E1,Germany,L1,England
-QF_M2,Quarter Finals,J1,Argentina,2,1,K1,Portugal,J1,Argentina
-QF_M3,Quarter Finals,I1,France,3,1,C2,Morocco,I1,France
-QF_M4,Quarter Finals,D1,USA,1,4,H1,Spain,H1,Spain
-SF_M1,Semi Finals,L1,England,3,1,J1,Argentina,L1,England
-SF_M2,Semi Finals,I1,France,3,2,H1,Spain,I1,France
-P3_M1,3rd Place,J1,Argentina,1,4,H1,Spain,H1,Spain
-F_M1,Final,L1,England,1,2,I1,France,I1,France
