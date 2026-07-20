@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Prediction League Leaderboard</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+  .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #222; }
+  
+  .admin-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 2px solid #ccc; text-align: center; }
+  .admin-panel h3 { margin-top: 0; color: #0056b3; }
+  .admin-panel p { color: #555; font-size: 14px; margin-bottom: 15px; }
+  
+  button { background: #0056b3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+  button:hover { background: #004494; }
+  
+  .status { text-align: center; font-style: italic; color: #666; margin-bottom: 20px; font-weight: bold; }
+  
+  /* Table & Ranking Styles */
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+  th { background: #222; color: white; }
+  .rank-1 { background: #ffd700; font-weight: bold; } /* Gold */
+  .rank-2 { background: #c0c0c0; font-weight: bold; } /* Silver */
+  .rank-3 { background: #cd7f32; font-weight: bold; } /* Bronze */
+  
+  /* Interactive Row Styles */
+  .clickable-row { cursor: pointer; transition: background-color 0.2s; }
+  .clickable-row:hover { filter: brightness(0.95); }
+  .dropdown-icon { font-size: 0.8em; color: #666; margin-left: 8px; transition: transform 0.2s; display: inline-block; }
+  .clickable-row.expanded .dropdown-icon { transform: rotate(180deg); }
+  
+  /* Dropdown Details Area */
+  .details-row { display: none; background: #fafafa; text-align: left; }
+  .details-row.open { display: table-row; }
+  
+  /* Tab System */
+  .tab-nav { display: flex; border-bottom: 2px solid #ddd; background: #eaeaea; }
+  .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; cursor: pointer; font-weight: bold; color: #555; text-align: center; font-size: 15px; }
+  .tab-btn:hover { background: #e0e0e0; }
+  .tab-btn.active { background: white; color: #0056b3; border-bottom: 3px solid #0056b3; margin-bottom: -2px; }
+  
+  .tab-content { display: none; padding: 20px; }
+  .tab-content.active { display: block; }
+
+  /* Tab 1: Scoring Layout */
+  .details-container { display: flex; gap: 20px; justify-content: center; }
+  .details-col { flex: 1; background: white; border: 1px solid #eee; padding: 15px; border-radius: 6px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); }
+  .details-col h4 { margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; }
+  
+  /* Tab 2: Full Predictions Layout */
+  .all-predictions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+  .stage-card { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 15px; }
+  .stage-card h4 { margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 10px; }
+  
+  .match-item { font-size: 0.9em; margin-bottom: 6px; padding: 8px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+  .match-info { display: flex; flex-direction: column; }
+  .actual-score { font-size: 0.85em; color: #888; font-style: italic; }
+  
+  /* Sub-headers for grouped stages */
+  .stage-header { margin: 15px 0 8px; color: #444; font-size: 0.85em; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px dashed #ccc; padding-bottom: 4px; }
+  
+  /* Badges */
+  .badge-exact { background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
+  .badge-result { background: #cce5ff; color: #004085; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85em; border-left: none; }
+  .exact-col { border-left-color: #28a745; }
+  .result-col { border-left-color: #007bff; }
+  
+  /* Submission Pills Styles */
+  .submissions-container { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; max-width: 160px; margin: 0 auto; }
+  .stage-pill { font-size: 0.75em; padding: 3px 6px; border-radius: 4px; font-weight: bold; background: #f0f0f0; color: #bbb; border: 1px solid #ddd; cursor: help; }
+  .stage-pill.provided { background: #e6f4ea; color: #1e8e3e; border-color: #1e8e3e; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>CSGUL 2026 World Cup Leaderboard</h1>
+  
+  <div class="admin-panel">
+    <h3>Automated Scoring</h3>
+    <p>This leaderboard securely syncs directly with the live GitHub database.<br>It will automatically read the `MASTER.csv` file from the repository root.</p>
+    <button onclick="runLeagueScorer()">📊 Sync & Calculate Scores</button>
+  </div>
+
+  <div id="statusMessage" class="status" style="display:none;"></div>
+  <div id="resultsArea"></div>
+</div>
+
+<script>
+// ==========================================
+// ⚙️ GITHUB CONFIGURATION
+// ==========================================
+const GITHUB_USERNAME = "ersiloshaj"; 
+const GITHUB_REPO = "tournamentpredictior"; 
+const TARGET_FOLDERS = ["groups", "R32", "R16", "R8", "R4", "finals"];
+
+// User-friendly names for display subheaders
+const STAGE_NAMES = {
+  "groups": "Group Stage",
+  "R32": "Round of 32",
+  "R16": "Round of 16",
+  "R8": "Quarter-Finals",
+  "R4": "Semi-Finals",
+  "finals": "Finals"
+};
+
+// 1. Robust Character-by-Character CSV Parser
+function parseCSV(text) {
+  let lines = text.trim().split("\n");
+  let headerLine = lines[0].replace(/^\uFEFF/, ''); 
+  let headers = headerLine.split(",").map(h => h.replace(/"/g, '').trim());
+  let data = [];
+  
+  for(let i=1; i<lines.length; i++){
+    let currentLine = lines[i].trim();
+    if(!currentLine) continue; 
+    
+    let row = [];
+    let inQuotes = false;
+    let currentCell = '';
+    
+    for(let j=0; j<currentLine.length; j++) {
+      let char = currentLine[j];
+      if(char === '"') {
+        inQuotes = !inQuotes;
+      } else if(char === ',' && !inQuotes) {
+        row.push(currentCell.trim());
+        currentCell = '';
+      } else {
+        currentCell += char;
+      }
+    }
+    row.push(currentCell.trim()); 
+    
+    let obj = {};
+    headers.forEach((h, index) => {
+      let val = row[index] !== undefined ? row[index].replace(/"/g, '') : "";
+      obj[h] = val;
+    });
+    data.push(obj);
+  }
+  return data;
+}
+
+// Security helper to prevent HTML injection errors
+function sanitizeHTML(str) {
+  let temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML;
+}
+
+// Dropdown Toggle
+window.toggleDetails = function(index) {
+  const detailsRow = document.getElementById(`details-${index}`);
+  const mainRow = document.getElementById(`main-row-${index}`);
+  
+  if (detailsRow.classList.contains('open')) {
+    detailsRow.classList.remove('open');
+    mainRow.classList.remove('expanded');
+  } else {
+    detailsRow.classList.add('open');
+    mainRow.classList.add('expanded');
+  }
+};
+
+// Tab System Handler
+window.switchTab = function(playerIndex, tabIndex) {
+  // Reset buttons
+  document.getElementById(`btn-scores-${playerIndex}`).classList.remove('active');
+  document.getElementById(`btn-preds-${playerIndex}`).classList.remove('active');
+  // Reset contents
+  document.getElementById(`content-scores-${playerIndex}`).classList.remove('active');
+  document.getElementById(`content-preds-${playerIndex}`).classList.remove('active');
+  
+  // Set active
+  if(tabIndex === 1) {
+    document.getElementById(`btn-scores-${playerIndex}`).classList.add('active');
+    document.getElementById(`content-scores-${playerIndex}`).classList.add('active');
+  } else {
+    document.getElementById(`btn-preds-${playerIndex}`).classList.add('active');
+    document.getElementById(`content-preds-${playerIndex}`).classList.add('active');
+  }
+};
+
+// Core Execution Scoring Engine
+async function runLeagueScorer() {
+  const statusEl = document.getElementById('statusMessage');
+  const resultsArea = document.getElementById('resultsArea');
+
+  statusEl.style.display = 'block';
+  resultsArea.innerHTML = ''; 
+
+  try {
+    // --- STEP A: Fetch Master File Automatically from GitHub Root ---
+    statusEl.innerText = "Locating Master file in repository root...";
+    
+    const rootRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/`);
+    if (!rootRes.ok) throw new Error("Could not access repository root. Check rate limits or repo visibility.");
+    
+    const rootFiles = await rootRes.json();
+    
+    // Find a file that starts with "MASTER" and ends with ".csv" (Case insensitive)
+    const masterFileInfo = rootFiles.find(f => 
+      f.type === 'file' && 
+      f.name.toUpperCase().startsWith('MASTER') && 
+      f.name.toLowerCase().endsWith('.csv')
+    );
+    
+    if (!masterFileInfo) {
+      throw new Error("Could not find a CSV file starting with 'MASTER' in the main repository folder.");
+    }
+    
+    statusEl.innerText = `Downloading Master file (${masterFileInfo.name})...`;
+    const masterDownloadRes = await fetch(`${masterFileInfo.download_url}?v=${new Date().getTime()}`);
+    if (!masterDownloadRes.ok) throw new Error("Failed to download Master file data.");
+    
+    const masterText = await masterDownloadRes.text();
+    const masterData = parseCSV(masterText);
+    
+    let actuals = {};
+    masterData.forEach(match => {
+      // We map everything, even if it hasn't been played yet, to display "Actual: TBD"
+      let isPlayed = match["Home Goals"] !== "-" && match["Away Goals"] !== "-" && match["Home Goals"] !== "" && match["Away Goals"] !== "";
+      
+      actuals[match["Match ID"]] = { 
+        isPlayed: isPlayed,
+        hg: isPlayed ? parseInt(match["Home Goals"]) : null, 
+        ag: isPlayed ? parseInt(match["Away Goals"]) : null 
+      };
+    });
+
+    // --- STEP B: Multi-Folder Repository Content Scrapes ---
+    statusEl.innerText = `Scanning directories (${TARGET_FOLDERS.join(", ")})...`;
+    
+    const folderPromises = TARGET_FOLDERS.map(folder => 
+      fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${folder}`)
+        .then(res => res.ok ? res.json() : [])
+        .then(files => files.map(f => ({ ...f, originFolder: folder }))) 
+        .catch(() => [])
+    );
+
+    const folderResults = await Promise.all(folderPromises);
+    const allFiles = folderResults.flat();
+    const playerFiles = allFiles.filter(file => file.name && file.name.toLowerCase().endsWith('.csv') && file.type === 'file');
+
+    if (playerFiles.length === 0) {
+      throw new Error(`Could not locate valid prediction CSV profiles inside matching target paths.`);
+    }
+
+    statusEl.innerText = `Processing batch profiles (${playerFiles.length} files total)...`;
+
+    // --- STEP C: Download All Discovered Prediction Modules ---
+    const playerTexts = await Promise.all(
+      playerFiles.map(async (file) => {
+        const res = await fetch(`${file.download_url}?v=${new Date().getTime()}`);
+        if(!res.ok) throw new Error(`Fetch pipeline down for: ${file.name}`);
+        return { name: file.name, originFolder: file.originFolder, content: await res.text() };
+      })
+    );
+
+    // --- STEP D: Aggregate and Cross-Reference Data Sets ---
+    let playersData = {};
+
+    for (let i = 0; i < playerTexts.length; i++) {
+      let pData = parseCSV(playerTexts[i].content);
+      let currentFolder = playerTexts[i].originFolder;
+      
+      let playerName = playerTexts[i].name
+        .replace(/\.csv$/i, '') 
+        .replace(/[-_\s]*(world[-_\s]*cup|predictions|groups|R32|R16|R8|R4|finals)/ig, '') 
+        .replace(/_/g, ' ') 
+        .trim(); 
+
+      if (playerName.length > 0) {
+        playerName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+      } else {
+        playerName = "Anonymous Player";
+      }
+
+      if (!playersData[playerName]) {
+        playersData[playerName] = {
+          name: playerName,
+          points: 0,
+          exact: 0,
+          results: 0,
+          exactList: {},
+          resultList: {},
+          allPredictions: {}, 
+          scoredMatches: new Set(),
+          submittedStages: new Set() 
+        };
+        TARGET_FOLDERS.forEach(folder => {
+          playersData[playerName].exactList[folder] = [];
+          playersData[playerName].resultList[folder] = [];
+          playersData[playerName].allPredictions[folder] = [];
+        });
+      }
+
+      playersData[playerName].submittedStages.add(currentFolder);
+
+      pData.forEach(pMatch => {
+        let mId = pMatch["Match ID"];
+        
+        if (mId && !playersData[playerName].scoredMatches.has(mId)) {
+          
+          let homeTeam = pMatch["Home Team"] || "Home Team";
+          let awayTeam = pMatch["Away Team"] || "Away Team";
+          let playerHGraw = pMatch["Home Goals"];
+          let playerAGraw = pMatch["Away Goals"];
+
+          // Only process rows where they actually made a numerical prediction
+          if (playerHGraw !== "-" && playerAGraw !== "-" && playerHGraw !== "" && playerAGraw !== "") {
+            
+            let playerHG = parseInt(playerHGraw);
+            let playerAG = parseInt(playerAGraw);
+
+            if (!isNaN(playerHG) && !isNaN(playerAG)) {
+              playersData[playerName].scoredMatches.add(mId); 
+
+              // Record the prediction for the "All Predictions" tab regardless of outcome
+              let actualText = "TBD";
+              if (actuals[mId] && actuals[mId].isPlayed) {
+                actualText = `${actuals[mId].hg} - ${actuals[mId].ag}`;
+              }
+              playersData[playerName].allPredictions[currentFolder].push({
+                match: `${homeTeam} vs ${awayTeam}`,
+                pred: `${playerHG} - ${playerAG}`,
+                actual: actualText
+              });
+
+              // Calculate Scores if the match has been played
+              if(actuals[mId] && actuals[mId].isPlayed) {
+                let actualHG = actuals[mId].hg;
+                let actualAG = actuals[mId].ag;
+
+                if (playerHG === actualHG && playerAG === actualAG) {
+                  playersData[playerName].points += 3;
+                  playersData[playerName].exact += 1;
+                  playersData[playerName].exactList[currentFolder].push(`${homeTeam} ${playerHG} - ${playerAG} ${awayTeam}`);
+                } else {
+                  let actualResult = actualHG > actualAG ? "H" : (actualAG > actualHG ? "A" : "D");
+                  let playerResult = playerHG > playerAG ? "H" : (playerAG > playerHG ? "A" : "D");
+                  
+                  if (actualResult === playerResult) {
+                    playersData[playerName].points += 1;
+                    playersData[playerName].results += 1;
+                    playersData[playerName].resultList[currentFolder].push(`${homeTeam} ${playerHG}-${playerAG} ${awayTeam} (Actual: ${actualHG}-${actualAG})`);
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    let leaderboard = Object.values(playersData);
+
+    // --- STEP E: Sort Matrices & Generate Interface Layout ---
+    statusEl.innerText = "Finalizing calculations...";
+    leaderboard.sort((a, b) => b.points - a.points || b.exact - a.exact || b.results - a.results);
+
+    let html = `<table><tr><th>Rank</th><th>Player Name</th><th>Total Points</th><th>Exact Scores (3pts)</th><th>Correct Results (1pt)</th><th>Submissions</th></tr>`;
+    
+    leaderboard.forEach((player, index) => {
+      let rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
+      
+      let exactHtml = "";
+      let resultHtml = "";
+      let allPredsHtml = "";
+      let submissionsHtml = `<div class="submissions-container">`;
+      
+      TARGET_FOLDERS.forEach(folder => {
+        // Build Verification Pills
+        let isProvided = player.submittedStages.has(folder);
+        let pillClass = isProvided ? "stage-pill provided" : "stage-pill";
+        let shortLabel = folder === "groups" ? "GRP" : folder === "finals" ? "FIN" : folder.toUpperCase();
+        submissionsHtml += `<span class="${pillClass}" title="${STAGE_NAMES[folder]}">${shortLabel}</span>`;
+
+        // Build Scoring Sub-lists
+        let displayStageName = STAGE_NAMES[folder] || folder;
+
+        if (player.exactList[folder] && player.exactList[folder].length > 0) {
+          exactHtml += `<div class="stage-header">📁 ${displayStageName}</div>`;
+          exactHtml += player.exactList[folder].map(m => `<div class="match-item exact-col"><span class="badge-exact">+3</span> ${sanitizeHTML(m)}</div>`).join('');
+        }
+        
+        if (player.resultList[folder] && player.resultList[folder].length > 0) {
+          resultHtml += `<div class="stage-header">📁 ${displayStageName}</div>`;
+          resultHtml += player.resultList[folder].map(m => `<div class="match-item result-col"><span class="badge-result">+1</span> ${sanitizeHTML(m)}</div>`).join('');
+        }
+
+        // Build All Predictions Sub-lists
+        if (player.allPredictions[folder] && player.allPredictions[folder].length > 0) {
+          allPredsHtml += `
+            <div class="stage-card">
+              <h4>📁 ${displayStageName}</h4>
+              ${player.allPredictions[folder].map(p => `
+                <div class="match-item">
+                  <div class="match-info">
+                    <strong>${sanitizeHTML(p.match)}</strong>
+                    <span class="actual-score">Actual: ${sanitizeHTML(p.actual)}</span>
+                  </div>
+                  <strong>${sanitizeHTML(p.pred)}</strong>
+                </div>
+              `).join('')}
+            </div>`;
+        }
+      });
+      submissionsHtml += `</div>`;
+      
+      if (exactHtml === "") exactHtml = `<div class="match-item" style="color:#888; border:none; margin-top:10px;">No exact hits processed yet.</div>`;
+      if (resultHtml === "") resultHtml = `<div class="match-item" style="color:#888; border:none; margin-top:10px;">No correct outcomes matched yet.</div>`;
+      if (allPredsHtml === "") allPredsHtml = `<div style="text-align:center; color:#888; padding:20px;">No predictions submitted yet.</div>`;
+
+      // Draw standard dashboard summary row
+      html += `<tr id="main-row-${index}" class="${rankClass} clickable-row" onclick="toggleDetails(${index})">
+                 <td>${index + 1}</td>
+                 <td style="font-weight:bold;">${sanitizeHTML(player.name)} <span class="dropdown-icon">▼</span></td>
+                 <td style="font-size:1.2em; font-weight:bold;">${player.points}</td>
+                 <td>${player.exact}</td>
+                 <td>${player.results}</td>
+                 <td>${submissionsHtml}</td>
+               </tr>`;
+               
+      // Draw details row with Tabs
+      html += `<tr id="details-${index}" class="details-row">
+                 <td colspan="6" style="padding: 0; background:#fff;">
+                   
+                   <div class="tab-nav">
+                     <button id="btn-scores-${index}" class="tab-btn active" onclick="switchTab(${index}, 1)">📊 Scoring Breakdown</button>
+                     <button id="btn-preds-${index}" class="tab-btn" onclick="switchTab(${index}, 2)">📝 All Predictions</button>
+                   </div>
+
+                   <div id="content-scores-${index}" class="tab-content active">
+                     <div class="details-container">
+                       <div class="details-col">
+                         <h4 style="color: #155724;">🎯 Exact Scores (+3 pts)</h4>
+                         ${exactHtml}
+                       </div>
+                       <div class="details-col">
+                         <h4 style="color: #004085;">✅ Correct Results (+1 pt)</h4>
+                         ${resultHtml}
+                       </div>
+                     </div>
+                   </div>
+
+                   <div id="content-preds-${index}" class="tab-content">
+                     <div class="all-predictions-grid">
+                       ${allPredsHtml}
+                     </div>
+                   </div>
+
+                 </td>
+               </tr>`;
+    });
+    
+    html += `</table>`;
+    
+    statusEl.style.display = 'none';
+    resultsArea.innerHTML = html;
+
+  } catch (error) {
+    statusEl.innerHTML = `<span style="color:red;">Scoring Exception: ${error.message}</span>`;
+    console.error(error);
+  }
+}
+</script>
+</body>
+</html>
